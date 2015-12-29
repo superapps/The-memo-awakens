@@ -62,6 +62,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             float[] measuredText = new float[1];
             int displayWidth = DisplayUtils.getDisplayWidth(memoText.getContext());
             int marginWidth = DisplayUtils.toPixel(memoText.getContext(), 14);
+            int extraMargin = DisplayUtils.toPixel(memoText.getContext(), 38);
 
             memoText.getPaint().breakText(memo.getText(), 0, memoText.getText().length(), false,
                     displayWidth - marginWidth
@@ -69,12 +70,12 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             float timeWidth = timeText.getPaint().measureText(timeString);
 
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) timeText.getLayoutParams();
-            if (measuredText[0] < (displayWidth - timeWidth - marginWidth - 100)) {
-                params.addRule(RelativeLayout.ALIGN_END, memoText.getId());
+            if (measuredText[0] < (displayWidth - timeWidth - marginWidth - extraMargin)) {
+                params.addRule(RelativeLayout.ALIGN_BOTTOM, memoText.getId());
                 params.removeRule(RelativeLayout.BELOW);
             } else {
                 params.addRule(RelativeLayout.BELOW, memoText.getId());
-                params.removeRule(RelativeLayout.ALIGN_END);
+                params.removeRule(RelativeLayout.ALIGN_BOTTOM);
             }
         }
     }

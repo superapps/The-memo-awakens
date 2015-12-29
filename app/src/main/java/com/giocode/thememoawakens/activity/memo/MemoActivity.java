@@ -1,30 +1,26 @@
 package com.giocode.thememoawakens.activity.memo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.Spannable;
 import android.text.TextUtils;
-import android.text.style.CharacterStyle;
-import android.text.style.UnderlineSpan;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.giocode.thememoawakens.BuildConfig;
 import com.giocode.thememoawakens.R;
+import com.giocode.thememoawakens.activity.register.RegisterActivity;
+import com.giocode.thememoawakens.bo.MemoBo;
 import com.giocode.thememoawakens.model.Memo;
 import com.giocode.thememoawakens.util.MemoTextConverter;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 public class MemoActivity extends AppCompatActivity {
 
@@ -32,6 +28,7 @@ public class MemoActivity extends AppCompatActivity {
     private Realm realm;
     private MemoAdapter adapter;
     private RecyclerView listView;
+    private MemoBo memoBo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,25 +37,29 @@ public class MemoActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        listView = (RecyclerView) findViewById(R.id.memo_list);
         editText = (EditText) findViewById(R.id.memo_input_edit);
+        adapter = new MemoAdapter();
+        listView.setAdapter(adapter);
+
+        realm = Realm.getDefaultInstance();
+        memoBo = new MemoBo(realm, new MemoEventHandler(listView, adapter));
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (TextUtils.isEmpty(editText.getText())) {
+                    startActivity(RegisterActivity.createIntent(MemoActivity.this));
                     return;
                 }
 
-                saveAndReload(MemoTextConverter.toHtmlString(editText.getText()), System.currentTimeMillis());
+                memoBo.saveAndReload(MemoTextConverter.toHtmlString(editText.getText()), System.currentTimeMillis());
                 editText.setText(null);
             }
         });
 
-        listView = (RecyclerView) findViewById(R.id.memo_list);
-        adapter = new MemoAdapter();
-        listView.setAdapter(adapter);
-        realm = Realm.getDefaultInstance();
-        load();
+        memoBo.load();
     }
 
     @Override
@@ -83,76 +84,38 @@ public class MemoActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_wipe_all_memos) {
-            wipeAllAndReload();
+            memoBo.wipeAllAndReload();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveAndReload(final String htmlText, final long time) {
-        if (TextUtils.isEmpty(htmlText)) {
-            return;
+    private static class MemoEventHandler extends Handler {
+
+        private final RecyclerView listView;
+        private final MemoAdapter adapter;
+
+        private MemoEventHandler(RecyclerView listView, MemoAdapter adapter) {
+            this.listView = listView;
+            this.adapter = adapter;
         }
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                if (BuildConfig.DEBUG) {
-                    Log.d("gio.memo", "save.execute");
-                }
-                Memo memo = new Memo();
-                memo.setHtmlText(htmlText);
-                memo.setTime(time);
-                realm.copyToRealm(memo);
-            }
-        }, new Realm.Transaction.Callback() {
-            @Override
-            public void onSuccess() {
-                load();
-            }
 
-            @Override
-            public void onError(Exception e) {
-                if (BuildConfig.DEBUG) {
-                    Log.d("gio.memo", "save.onError", e);
-                }
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MemoBo.EVENT_LOAD_COMPLETED:
+                    RealmResults<Memo> memos = (RealmResults<Memo>) msg.obj;
+                    this.adapter.setMemos(memos);
+                    if (memos != null && memos.size() > 0) {
+                        listView.smoothScrollToPosition(memos.size() - 1);
+                    }
+                    break;
+                default:
+                    break;
             }
-        });
-    }
-
-    private void wipeAllAndReload() {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                final RealmResults<Memo> realmResults = realm.where(Memo.class)
-                        .findAll();
-                realmResults.clear();
-            }
-        }, new Realm.Transaction.Callback() {
-            @Override
-            public void onSuccess() {
-                load();
-            }
-        });
-    }
-
-    private void load() {
-        if (BuildConfig.DEBUG) {
-            Log.d("gio.memo", "load.start");
         }
-        final RealmResults<Memo> realmResults = realm.where(Memo.class)
-                .findAllSortedAsync("time", Sort.ASCENDING);
-        realmResults.addChangeListener(new RealmChangeListener() {
-            @Override
-            public void onChange() {
-                if (BuildConfig.DEBUG) {
-                    Log.d("gio.memo", "load.onChange");
-                }
-                adapter.setMemos(realmResults);
-                if (realmResults != null && realmResults.size() > 0) {
-                    listView.smoothScrollToPosition(realmResults.size() - 1);
-                }
-            }
-        });
     }
+
 }
