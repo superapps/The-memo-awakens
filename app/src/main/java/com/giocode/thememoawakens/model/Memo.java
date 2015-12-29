@@ -2,10 +2,11 @@ package com.giocode.thememoawakens.model;
 
 import android.text.Html;
 
+import com.giocode.thememoawakens.util.MemoTextConverter;
+
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.Index;
-import io.realm.annotations.Required;
 
 public class Memo extends RealmObject {
 
@@ -34,7 +35,8 @@ public class Memo extends RealmObject {
 
     public CharSequence getText() {
         if (text == null) {
-            text = Html.fromHtml(getHtmlText());
+            String htmlText = getHtmlText();
+            text = MemoTextConverter.toCharSequence(htmlText);
         }
         return text;
     }

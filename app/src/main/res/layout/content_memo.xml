@@ -13,8 +13,11 @@
     tools:context="com.giocode.thememoawakens.activity.memo.MemoActivity"
     tools:showIn="@layout/activity_memo">
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/memo_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         android:layout_above="@+id/memo_input_layout"/>
 
     <LinearLayout
@@ -30,13 +33,8 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:minHeight="30dp"
+            android:maxLines="4"
+            android:layout_marginRight="40dp"
             />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/playlist_plus"
-            />
-
     </LinearLayout>
 </RelativeLayout>
