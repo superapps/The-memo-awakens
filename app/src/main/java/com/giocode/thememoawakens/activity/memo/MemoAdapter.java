@@ -36,9 +36,8 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
         return this.memos != null ? this.memos.size() : 0;
     }
 
-    public void setMemos(List<Memo> memos) {
+    public void updateMemoResults(List<Memo> memos) {
         this.memos = memos;
-        notifyDataSetChanged();
     }
 
     public static class MemoViewHolder extends RecyclerView.ViewHolder {

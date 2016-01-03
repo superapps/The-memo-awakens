@@ -10,20 +10,20 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.giocode.thememoawakens.activity.register.RegisterActivity"
-    tools:showIn="@layout/activity_register">
+    tools:context=".activity.reserved.ReservedActivity"
+    tools:showIn="@layout/activity_reserved">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/register_memo_list"
+        android:id="@+id/reserved_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/register_input_edit"
+        android:layout_above="@+id/reserved_input_edit"
         android:orientation="vertical"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"/>
 
 
     <EditText
-        android:id="@+id/register_input_edit"
+        android:id="@+id/reserved_input_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

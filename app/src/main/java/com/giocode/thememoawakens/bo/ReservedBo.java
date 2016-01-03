@@ -3,32 +3,33 @@ package com.giocode.thememoawakens.bo;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.giocode.thememoawakens.dao.MemoDao;
-import com.giocode.thememoawakens.model.Memo;
+import com.giocode.thememoawakens.dao.ReservedDao;
+import com.giocode.thememoawakens.model.Reserved;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class MemoBo {
+public class ReservedBo {
 
     @NonNull
     private final Realm realm;
     @NonNull
-    private final MemoDao dao = new MemoDao();
+    private final ReservedDao dao = new ReservedDao();
 
-
-    public MemoBo(Realm realm) {
+    public ReservedBo(@NonNull Realm realm) {
         this.realm = realm;
     }
 
-    public void add(final String htmlText, final long time) {
+    public void add(final long parentId, final String htmlText) {
+
         if (TextUtils.isEmpty(htmlText)) {
             return;
         }
+
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                dao.insert(realm, htmlText, time);
+                dao.insert(realm, parentId, htmlText);
             }
         });
     }
@@ -42,8 +43,8 @@ public class MemoBo {
         });
     }
 
-    public RealmResults<Memo> load() {
-        return dao.getAsync(realm);
+    public RealmResults<Reserved> load(final long parentId) {
+        return dao.getReserved(realm, parentId);
     }
 
 }
