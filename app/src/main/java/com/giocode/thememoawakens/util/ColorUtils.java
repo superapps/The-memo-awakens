@@ -17,6 +17,7 @@ public class ColorUtils {
             R.color.color_purple,
             R.color.color_red,
             R.color.color_yellow,
+            R.color.color_white,
     };
 
     private static int[] COLOR_PRESSED_IDS = new int[]{
@@ -27,7 +28,11 @@ public class ColorUtils {
             R.color.color_purple_pressed,
             R.color.color_red_pressed,
             R.color.color_yellow_pressed,
+            R.color.color_white_pressed
     };
+
+    public static int COLORS_SIZE = COLOR_IDS.length;
+    public static int COLOR_WHITE = -1;
 
     public static int getRandomIndex() {
         return new Random(System.currentTimeMillis()).nextInt(COLOR_IDS.length);
@@ -55,7 +60,7 @@ public class ColorUtils {
         if (index >= 0 && index < colorIds.length) {
             colorId = colorIds[index];
         } else {
-            colorId = colorIds[0];
+            colorId = android.R.color.transparent;
         }
         return context.getResources().getColor(colorId);
     }

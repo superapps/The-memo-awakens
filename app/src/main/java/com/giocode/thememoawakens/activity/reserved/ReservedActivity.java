@@ -2,17 +2,19 @@ package com.giocode.thememoawakens.activity.reserved;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.Spanned;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
@@ -20,13 +22,15 @@ import com.giocode.thememoawakens.R;
 import com.giocode.thememoawakens.bo.ReservedBo;
 import com.giocode.thememoawakens.model.Reserved;
 import com.giocode.thememoawakens.util.ColorUtils;
-import com.giocode.thememoawakens.util.MemoTextConverter;
+import com.giocode.thememoawakens.util.TextConverter;
+
+import org.w3c.dom.Text;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class ReservedActivity extends AppCompatActivity {
+public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final String EXTRA_PARENT_ID = "parentId";
     private static final String EXTRA_PARENT_RESERVED_TEXT = "parentReservedText";
@@ -42,6 +46,7 @@ public class ReservedActivity extends AppCompatActivity {
     private boolean shouldScrollToBottom = true;
     private long parentId;
     private int colorIndex;
+    private FloatingActionButton colorChangeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,34 +74,55 @@ public class ReservedActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                BackgroundColorSpan[] spans = s.getSpans(0, s.length(), BackgroundColorSpan.class);
-                for (BackgroundColorSpan backgroundColorSpan : spans) {
-                    s.removeSpan(backgroundColorSpan);
-                }
-                s.setSpan(new BackgroundColorSpan(ColorUtils.getColor(ReservedActivity.this, colorIndex)), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                TextConverter.changeBgColor(s, ColorUtils.getColor(ReservedActivity.this, colorIndex));
             }
         });
 
         FloatingActionButton fabPlus = (FloatingActionButton) findViewById(R.id.fab_plus);
-        FloatingActionButton fabColor = (FloatingActionButton) findViewById(R.id.fab_color);
+        colorChangeButton = (FloatingActionButton) findViewById(R.id.fab_color);
         fabPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 shouldScrollToBottom = true;
-                reservedBo.add(parentId, MemoTextConverter.toHtmlString(editText.getText()));
+                reservedBo.add(parentId, TextConverter.toHtmlString(editText.getText()));
                 editText.setText(null);
             }
         });
-        fabColor.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
-        fabColor.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
-        fabColor.setOnClickListener(new View.OnClickListener() {
+        colorChangeButton.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
+        colorChangeButton.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
+        colorChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                showPopupMenu();
             }
         });
         parseIntent(getIntent());
         updateReservedResults(reservedBo.load(parentId));
+    }
+
+    private void showPopupMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, colorChangeButton);
+        popupMenu.setOnMenuItemClickListener(this);
+        Menu menu = popupMenu.getMenu();
+        String currentText = editText.getText().length() > 0 ? editText.getText().toString() : getString(R.string.app_name);
+
+        int itemId = 0;
+        for (int i = 0; i < ColorUtils.COLORS_SIZE; i++) {
+            Spannable spannable = new SpannableStringBuilder(currentText);
+            TextConverter.changeBgColor(spannable, ColorUtils.getColor(this, i));
+            menu.addSubMenu(0, itemId++, 0, spannable);
+        }
+        popupMenu.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        colorIndex = item.getItemId();
+        colorChangeButton.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
+        colorChangeButton.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
+
+        TextConverter.changeBgColor(editText.getText(), ColorUtils.getColor(this, colorIndex));
+        return true;
     }
 
     @Override
@@ -159,5 +185,4 @@ public class ReservedActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_PARENT_ID, parentId);
         return intent;
     }
-
 }

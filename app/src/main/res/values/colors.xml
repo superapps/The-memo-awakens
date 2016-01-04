@@ -19,4 +19,8 @@
     <color name="color_yellow">#FFFF8D</color>
     <color name="color_yellow_pressed">#FFFF00</color>
 
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_white_pressed">#ECEFF1</color>
+
+
 </resources>

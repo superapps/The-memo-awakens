@@ -19,7 +19,7 @@ import com.giocode.thememoawakens.bo.MemoBo;
 import com.giocode.thememoawakens.bo.ReservedBo;
 import com.giocode.thememoawakens.model.Memo;
 import com.giocode.thememoawakens.model.Reserved;
-import com.giocode.thememoawakens.util.MemoTextConverter;
+import com.giocode.thememoawakens.util.TextConverter;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -72,9 +72,8 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         showPopupMenu();
                     }
                 }
-
                 shouldScrollToBottom = true;
-                memoBo.add(MemoTextConverter.toHtmlString(editText.getText()), System.currentTimeMillis());
+                memoBo.add(TextConverter.toHtmlString(editText.getText()), System.currentTimeMillis());
                 editText.setText(null);
             }
         });

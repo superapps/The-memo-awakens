@@ -9,7 +9,7 @@ import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 
-public class MemoTextConverter {
+public class TextConverter {
 
     public static String toHtmlString(final Spannable spannable) {
         if (spannable == null || spannable.length() == 0) {
@@ -22,7 +22,10 @@ public class MemoTextConverter {
                 spannable.removeSpan(span);
             } else if (span instanceof BackgroundColorSpan) {
                 spannable.removeSpan(span);
-                spannable.setSpan(new ForegroundColorSpan(((BackgroundColorSpan)span).getBackgroundColor()), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                int color = ((BackgroundColorSpan)span).getBackgroundColor();
+                if (color != ColorUtils.COLOR_WHITE) {
+                    spannable.setSpan(new ForegroundColorSpan(color), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
         String htmlText = Html.toHtml(spannable);
@@ -40,13 +43,24 @@ public class MemoTextConverter {
             for (ForegroundColorSpan foregroundColorSpan : foregroundColorSpans) {
                 spannable.removeSpan(foregroundColorSpan);
             }
-            spannable.setSpan(new BackgroundColorSpan(((ForegroundColorSpan) foregroundColorSpans[0]).getForegroundColor()), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            int color = ((ForegroundColorSpan) foregroundColorSpans[0]).getForegroundColor();
+            spannable.setSpan(new BackgroundColorSpan(color), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         // remove last line feed because of <p></p> tag
         while(text.charAt(text.length() - 1) == '\n') {
             text = text.subSequence(0, text.length() - 1);
         }
         return text;
+    }
+
+    public static void changeBgColor(final Spannable spannable, final int bgColor) {
+        BackgroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), BackgroundColorSpan.class);
+        for (BackgroundColorSpan backgroundColorSpan : spans) {
+            spannable.removeSpan(backgroundColorSpan);
+        }
+        if (bgColor != ColorUtils.COLOR_WHITE) {
+            spannable.setSpan(new BackgroundColorSpan(bgColor), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 
 }

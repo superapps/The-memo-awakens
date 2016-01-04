@@ -1,6 +1,6 @@
 package com.giocode.thememoawakens.model;
 
-import com.giocode.thememoawakens.util.MemoTextConverter;
+import com.giocode.thememoawakens.util.TextConverter;
 
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
@@ -56,7 +56,7 @@ public class Reserved extends RealmObject {
     public CharSequence getText() {
         if (text == null) {
             String htmlText = getHtmlText();
-            text = MemoTextConverter.toCharSequence(htmlText);
+            text = TextConverter.toCharSequence(htmlText);
         }
         return text;
     }
