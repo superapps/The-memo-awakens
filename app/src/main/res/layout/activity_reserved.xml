@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             app:fabSize="mini"
             android:layout_marginRight="3dp"
-            android:src="@drawable/ic_color_lens_white_24dp" />
+            android:src="@drawable/ic_text_format_black_24dp" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_plus"

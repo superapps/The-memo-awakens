@@ -7,6 +7,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +19,7 @@ import android.widget.EditText;
 import com.giocode.thememoawakens.R;
 import com.giocode.thememoawakens.bo.ReservedBo;
 import com.giocode.thememoawakens.model.Reserved;
+import com.giocode.thememoawakens.util.ColorUtils;
 import com.giocode.thememoawakens.util.MemoTextConverter;
 
 import io.realm.Realm;
@@ -35,6 +41,7 @@ public class ReservedActivity extends AppCompatActivity {
     private RealmChangeListener reservedResultsChangeListener;
     private boolean shouldScrollToBottom = true;
     private long parentId;
+    private int colorIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,25 @@ public class ReservedActivity extends AppCompatActivity {
 
         realm = Realm.getDefaultInstance();
         reservedBo = new ReservedBo(realm);
+        colorIndex = ColorUtils.getRandomIndex();
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                BackgroundColorSpan[] spans = s.getSpans(0, s.length(), BackgroundColorSpan.class);
+                for (BackgroundColorSpan backgroundColorSpan : spans) {
+                    s.removeSpan(backgroundColorSpan);
+                }
+                s.setSpan(new BackgroundColorSpan(ColorUtils.getColor(ReservedActivity.this, colorIndex)), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        });
 
         FloatingActionButton fabPlus = (FloatingActionButton) findViewById(R.id.fab_plus);
         FloatingActionButton fabColor = (FloatingActionButton) findViewById(R.id.fab_color);
@@ -61,6 +87,8 @@ public class ReservedActivity extends AppCompatActivity {
                 editText.setText(null);
             }
         });
+        fabColor.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
+        fabColor.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
         fabColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
