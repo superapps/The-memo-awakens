@@ -10,24 +10,24 @@ import java.util.Random;
 public class ColorUtils {
 
     private static int[] COLOR_IDS = new int[]{
-            R.color.color_blue,
-            R.color.color_green,
-            R.color.color_indigo,
-            R.color.color_pink,
-            R.color.color_purple,
-            R.color.color_red,
-            R.color.color_yellow,
+            R.color.color_1,
+            R.color.color_2,
+            R.color.color_3,
+            R.color.color_4,
+            R.color.color_5,
+            R.color.color_6,
+            R.color.color_7,
             R.color.color_white,
     };
 
     private static int[] COLOR_PRESSED_IDS = new int[]{
-            R.color.color_blue_pressed,
-            R.color.color_green_pressed,
-            R.color.color_indigo_pressed,
-            R.color.color_pink_pressed,
-            R.color.color_purple_pressed,
-            R.color.color_red_pressed,
-            R.color.color_yellow_pressed,
+            R.color.color_1_pressed,
+            R.color.color_2_pressed,
+            R.color.color_3_pressed,
+            R.color.color_4_pressed,
+            R.color.color_5_pressed,
+            R.color.color_6_pressed,
+            R.color.color_7_pressed,
             R.color.color_white_pressed
     };
 
