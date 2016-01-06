@@ -40,7 +40,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
         this.memos = memos;
     }
 
-    public static class MemoViewHolder extends RecyclerView.ViewHolder {
+    public static class MemoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final TextView memoText;
         private final TextView timeText;
@@ -49,6 +49,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             super(itemView);
             this.memoText = (TextView) itemView.findViewById(R.id.memo_text);
             this.timeText = (TextView) itemView.findViewById(R.id.memo_time);
+            itemView.setOnClickListener(this);
         }
 
         public void update(final Memo memo) {
@@ -76,6 +77,11 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
                 params.addRule(RelativeLayout.BELOW, memoText.getId());
                 params.removeRule(RelativeLayout.ALIGN_BOTTOM);
             }
+        }
+
+        @Override
+        public void onClick(View v) {
+
         }
     }
 }
