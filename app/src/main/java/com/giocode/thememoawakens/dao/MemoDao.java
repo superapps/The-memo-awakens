@@ -43,4 +43,10 @@ public class MemoDao {
                 .findAll();
         realmResults.clear();
     }
+
+    public void delete(List<Memo> selectedMemos) {
+        for (Memo memo : selectedMemos) {
+            memo.removeFromRealm();
+        }
+    }
 }

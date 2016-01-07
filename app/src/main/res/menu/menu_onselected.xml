@@ -1,8 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_delete"
-        android:title="@string/delete"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete_white_24dp"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
+        android:title="@string/delete"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_select_all"
+        android:title="@string/select_all"
+        app:showAsAction="never"/>
 </menu>

@@ -40,7 +40,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
     }
 
 
-    public class ReservedViewHolder  extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ReservedViewHolder  extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private final TextView reservedText;
         private final TextView childCount;
@@ -51,6 +51,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
             reservedText = (TextView) itemView.findViewById(R.id.reserved_text);
             childCount = (TextView) itemView.findViewById(R.id.reserved_child_count);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         public void update(Reserved reserved) {
@@ -62,6 +63,11 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
         @Override
         public void onClick(View v) {
             v.getContext().startActivity(ReservedActivity.createIntent(v.getContext(), reserved));
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            return false;
         }
     }
 }

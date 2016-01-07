@@ -72,6 +72,10 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
         return selectedMemos != null ? selectedMemos.size() : 0;
     }
 
+    public List<Memo> getSelectedMemos() {
+        return selectedMemos;
+    }
+
     public void toggleSelectItem(int position) {
         if (this.selectedMemos == null) {
             this.selectedMemos = new ArrayList<>();
@@ -82,11 +86,18 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
         } else {
             this.selectedMemos.add(selectedMemo);
         }
+        notifyDataSetChanged();
+    }
+
+    public void selectAll() {
+        this.selectedMemos = memos;
+        notifyDataSetChanged();
     }
 
     public static class MemoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private final MemoAdapter adapter;
+        private final View memoBg;
         private final TextView dateText;
         private final TextView memoText;
         private final TextView timeText;
@@ -96,6 +107,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
         public MemoViewHolder(MemoAdapter adapter, View itemView) {
             super(itemView);
             this.adapter = adapter;
+            this.memoBg = itemView.findViewById(R.id.memo_bg);
             this.dateText = (TextView) itemView.findViewById(R.id.memo_date);
             this.memoText = (TextView) itemView.findViewById(R.id.memo_text);
             this.timeText = (TextView) itemView.findViewById(R.id.memo_time);
@@ -122,9 +134,9 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             }
 
             if (adapter.isSelectedMode() && adapter.selectedMemos.contains(memo)) {
-
+                memoBg.setBackgroundResource(R.drawable.selected_rect);
             } else {
-
+                memoBg.setBackgroundColor(memoBg.getContext().getResources().getColor(android.R.color.transparent));
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {

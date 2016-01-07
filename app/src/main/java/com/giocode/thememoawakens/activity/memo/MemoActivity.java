@@ -189,6 +189,15 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                 @Override
                 public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    int id = item.getItemId();
+                    if (id == R.id.action_delete) {
+                        memoBo.delete(adapter.getSelectedMemos());
+                        actionMode.finish();
+                        return true;
+                    } else if (id == R.id.action_select_all) {
+                        adapter.selectAll();
+                        return true;
+                    }
                     return false;
                 }
 

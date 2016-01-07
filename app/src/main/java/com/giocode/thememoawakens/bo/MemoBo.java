@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import com.giocode.thememoawakens.dao.MemoDao;
 import com.giocode.thememoawakens.model.Memo;
 
+import java.util.List;
+
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -46,4 +48,18 @@ public class MemoBo {
         return dao.getAsync(realm);
     }
 
+    public void delete(final List<Memo> selectedMemos) {
+        if (selectedMemos == null || selectedMemos.isEmpty()) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                dao.delete(selectedMemos);
+            }
+        });
+
+
+    }
 }

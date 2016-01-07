@@ -6,4 +6,5 @@
     <string name="title_activity_register">RegisterActivity</string>
     <string name="add">Add…</string>
     <string name="delete">Delete</string>
+    <string name="select_all">Select all</string>
 </resources>
