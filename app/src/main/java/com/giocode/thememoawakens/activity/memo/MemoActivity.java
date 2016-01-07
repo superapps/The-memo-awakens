@@ -8,18 +8,22 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
 import com.giocode.thememoawakens.R;
+import com.giocode.thememoawakens.activity.memo.event.MemoItemClickEvent;
 import com.giocode.thememoawakens.activity.reserved.ReservedActivity;
 import com.giocode.thememoawakens.bo.MemoBo;
 import com.giocode.thememoawakens.bo.ReservedBo;
+import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Memo;
 import com.giocode.thememoawakens.model.Reserved;
 import com.giocode.thememoawakens.util.TextConverter;
+import com.squareup.otto.Subscribe;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -27,6 +31,7 @@ import io.realm.RealmResults;
 
 public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
 
+    private Toolbar toolbar;
     private EditText editText;
     private Realm realm;
     private MemoAdapter adapter;
@@ -42,13 +47,14 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private RealmChangeListener reservedResultsChangeListener;
     private FloatingActionButton addButton;
     private boolean reservedItemClicked;
+    private ActionMode actionMode;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         listView = (RecyclerView) findViewById(R.id.memo_list);
@@ -82,17 +88,24 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         updateReservedResult(reservedBo.load(0));
     }
 
-    private void showPopupMenu() {
-        PopupMenu popupMenu = new PopupMenu(this, addButton);
-        popupMenu.setOnMenuItemClickListener(MemoActivity.this);
-        popupMenu.setOnDismissListener(MemoActivity.this);
-        Menu menu = popupMenu.getMenu();
-        int itemId = 0;
-        for (Reserved reserved : currentReservedResults) {
-            menu.addSubMenu(0, itemId++, 0, reserved.getText());
-        }
-        menu.addSubMenu(0, itemId++, 0, R.string.add);
-        popupMenu.show();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getInstance().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getInstance().unregister(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        closeMemoResults();
+        realm.close();
     }
 
     @Override
@@ -140,13 +153,6 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        closeMemoResults();
-        realm.close();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -163,6 +169,57 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Subscribe
+    public void onMemoItemClickEvent(MemoItemClickEvent event) {
+        if (event.isLongClick()) {
+            adapter.setSelectedMode(true, event.getPosition());
+            actionMode = toolbar.startActionMode(new ActionMode.Callback() {
+                @Override
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    mode.getMenuInflater().inflate(R.menu.menu_onselected, menu);
+                    return true;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    return false;
+                }
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    return false;
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    actionMode = null;
+                    adapter.setSelectedMode(false, 0);
+                }
+            });
+        } else {
+            if (adapter.isSelectedMode()) {
+                adapter.toggleSelectItem(event.getPosition());
+            }
+        }
+
+        if (actionMode != null) {
+            actionMode.setTitle(String.valueOf(adapter.getSelectedCount()));
+        }
+    }
+
+    private void showPopupMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, addButton);
+        popupMenu.setOnMenuItemClickListener(MemoActivity.this);
+        popupMenu.setOnDismissListener(MemoActivity.this);
+        Menu menu = popupMenu.getMenu();
+        int itemId = 0;
+        for (Reserved reserved : currentReservedResults) {
+            menu.addSubMenu(0, itemId++, 0, reserved.getText());
+        }
+        menu.addSubMenu(0, itemId++, 0, R.string.add);
+        popupMenu.show();
     }
 
     private void updateMemoResults(final RealmResults<Memo> memoResults) {
