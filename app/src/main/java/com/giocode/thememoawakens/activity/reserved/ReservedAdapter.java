@@ -22,6 +22,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
     List<Reserved> reservedResults;
     List<Reserved> selectedReservedResults;
     private boolean selectedMode;
+    private boolean enableChild;
 
     @Override
     public ReservedViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -53,6 +54,9 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
         this.selectedMode = selectMode;
         if (selectMode) {
             toggleSelectItem(position);
+        } else {
+            selectedReservedResults = null;
+            notifyDataSetChanged();
         }
     }
 
@@ -60,7 +64,12 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
         if (selectedReservedResults == null) {
             selectedReservedResults = new ArrayList<>();
         }
-        selectedReservedResults.add(reservedResults.get(position));
+        Reserved selected = reservedResults.get(position);
+        if (selectedReservedResults.contains(selected)) {
+            selectedReservedResults.remove(selected);
+        } else {
+            selectedReservedResults.add(selected);
+        }
         notifyDataSetChanged();
     }
 
@@ -73,8 +82,13 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
     }
 
     public void selectAll() {
-        selectedReservedResults = reservedResults;
+        selectedReservedResults.clear();
+        selectedReservedResults.addAll(reservedResults);
         notifyDataSetChanged();
+    }
+
+    public void setEnableChild(boolean enableChild) {
+        this.enableChild = enableChild;
     }
 
     public class ReservedViewHolder  extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
@@ -83,6 +97,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
         private final View bgView;
         private final TextView reservedText;
         private final TextView childCount;
+        private final View plusView;
         private int position;
 
         public ReservedViewHolder(ReservedAdapter adapter, View itemView) {
@@ -91,14 +106,27 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
             bgView = itemView.findViewById(R.id.reserved_bg);
             reservedText = (TextView) itemView.findViewById(R.id.reserved_text);
             childCount = (TextView) itemView.findViewById(R.id.reserved_child_count);
+            plusView = itemView.findViewById(R.id.reserved_plus);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }
 
         public void update(final int position, final Reserved reserved) {
             this.position = position;
-            reservedText.setText(TextConverter.toCharSequence(reserved.getHtmlText(), reservedText));
-            childCount.setText(reserved.getChildCount() > 0 ? String.valueOf(reserved.getChildCount()) : "+");
+            reservedText.setText(TextConverter.toCharSequence(reservedText.getContext(), reserved.getText(), reserved.getSpans(), reservedText));
+            if (adapter.enableChild) {
+                if (reserved.getChildCount() > 0) {
+                    childCount.setText(String.valueOf(reserved.getChildCount()));
+                    childCount.setVisibility(View.VISIBLE);
+                    plusView.setVisibility(View.GONE);
+                } else {
+                    childCount.setVisibility(View.GONE);
+                    plusView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                childCount.setVisibility(View.GONE);
+                plusView.setVisibility(View.GONE);
+            }
 
             if (adapter.isSelectedMode() && adapter.selectedReservedResults.contains(reserved)) {
                 bgView.setBackgroundResource(R.drawable.selected_rect);
@@ -109,7 +137,9 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
 
         @Override
         public void onClick(View v) {
-            EventBus.postOnMainThread(new ListItemClickEvent(position, false));
+            if (adapter.enableChild) {
+                EventBus.postOnMainThread(new ListItemClickEvent(position, false));
+            }
         }
 
         @Override

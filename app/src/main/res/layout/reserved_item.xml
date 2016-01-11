@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="7dp">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/reserved_text"
@@ -30,6 +30,18 @@
             android:textAppearance="@android:style/TextAppearance.Small"
             />
 
+        <ImageView
+            android:id="@+id/reserved_plus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:gravity="center_vertical"
+            android:src="@drawable/ic_add_white_24dp"
+            android:tint="@color/colorPrimaryText"
+            android:layout_alignTop="@+id/reserved_text"
+            android:layout_alignBottom="@+id/reserved_text"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            />
 
     </RelativeLayout>
 

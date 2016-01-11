@@ -61,8 +61,8 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             toggleSelectItem(initialSelectPosition);
         } else {
             this.selectedMemos = null;
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
     public boolean isSelectedMode() {
@@ -91,7 +91,8 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
     }
 
     public void selectAll() {
-        this.selectedMemos = memos;
+        this.selectedMemos.clear();
+        this.selectedMemos.addAll(memos);
         notifyDataSetChanged();
     }
 
@@ -118,7 +119,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
 
         public void update(final int position, @NonNull final Memo memo, @Nullable final Memo previousMemo) {
             this.position = position;
-            memoText.setText(TextConverter.toCharSequence(memo.getHtmlText(), memoText));
+            memoText.setText(TextConverter.toCharSequence(memoText.getContext(), memo.getText(), memo.getSpans(), memoText));
             String timeString = DateUtils.formatDateTime(timeText.getContext(), memo.getTime(), DateUtils.FORMAT_SHOW_TIME);
             timeText.setText(timeString);
 
@@ -148,7 +149,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             int marginWidth = DisplayUtils.toPixel(memoText.getContext(), 14);
             int extraMargin = DisplayUtils.toPixel(memoText.getContext(), 38);
 
-            memoText.getPaint().breakText(TextConverter.toCharSequence(memo.getHtmlText(), memoText), 0, memoText.getText().length(), false,
+            memoText.getPaint().breakText(TextConverter.toCharSequence(memoText.getContext(), memo.getText(), memo.getSpans(), memoText), 0, memoText.getText().length(), false,
                     displayWidth - marginWidth
                     , measuredText);
             float timeWidth = timeText.getPaint().measureText(timeString);

@@ -2,6 +2,9 @@ package com.giocode.thememoawakens.model;
 
 import com.giocode.thememoawakens.util.TextConverter;
 
+import java.util.List;
+
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.Index;
@@ -13,10 +16,8 @@ public class Memo extends RealmObject {
     private long id;
     @Index
     private long time;
-    private String htmlText;
-
-//    @Ignore
-//    private CharSequence text;
+    private String text;
+    private RealmList<Span> spans;
 
     public long getId() {
         return id;
@@ -34,19 +35,19 @@ public class Memo extends RealmObject {
         this.time = time;
     }
 
-    public String getHtmlText() {
-        return htmlText;
+    public String getText() {
+        return text;
     }
 
-    public void setHtmlText(String htmlText) {
-        this.htmlText = htmlText;
+    public void setText(String text) {
+        this.text = text;
     }
 
-//    public CharSequence getText() {
-//        if (text == null) {
-//            String htmlText = getHtmlText();
-//            text = TextConverter.toCharSequence(htmlText);
-//        }
-//        return text;
-//    }
+    public RealmList<Span> getSpans() {
+        return spans;
+    }
+
+    public void setSpans(RealmList<Span> spans) {
+        this.spans = spans;
+    }
 }

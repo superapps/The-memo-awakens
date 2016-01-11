@@ -24,29 +24,4 @@
 
     <include layout="@layout/content_reserved"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        >
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabSize="mini"
-            android:layout_marginRight="3dp"
-            android:src="@drawable/ic_text_format_black_24dp" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_plus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabSize="mini"
-            android:src="@drawable/ic_add_white_24dp" />
-
-    </LinearLayout>
-
 </android.support.design.widget.CoordinatorLayout>

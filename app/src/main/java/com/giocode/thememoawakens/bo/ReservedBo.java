@@ -1,14 +1,17 @@
 package com.giocode.thememoawakens.bo;
 
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.giocode.thememoawakens.dao.ReservedDao;
 import com.giocode.thememoawakens.model.Reserved;
+import com.giocode.thememoawakens.model.Span;
 
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class ReservedBo {
@@ -22,16 +25,16 @@ public class ReservedBo {
         this.realm = realm;
     }
 
-    public void add(final long parentId, final String htmlText) {
+    public void add(final long parentId, final Pair<String, RealmList<Span>> textInfo) {
 
-        if (TextUtils.isEmpty(htmlText)) {
+        if (textInfo == null || TextUtils.isEmpty(textInfo.first)) {
             return;
         }
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                dao.insert(realm, parentId, htmlText);
+                dao.insert(realm, parentId, textInfo.first, textInfo.second);
             }
         });
     }
@@ -53,7 +56,7 @@ public class ReservedBo {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                dao.delete(selected);
+                dao.delete(realm, selected);
             }
         });
 

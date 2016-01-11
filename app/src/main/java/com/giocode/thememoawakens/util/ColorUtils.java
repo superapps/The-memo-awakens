@@ -1,9 +1,9 @@
 package com.giocode.thememoawakens.util;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
@@ -58,6 +58,18 @@ public class ColorUtils {
         SpannableStringBuilder spannable = new SpannableStringBuilder(" ");
         spannable.setSpan(new ImageSpan(getTagDrawable(context, textView, id), String.valueOf(id), ImageSpan.ALIGN_BOTTOM), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spannable;
+    }
+
+    public static int getTagColorId(final Context context, final Spannable spannable) {
+        ImageSpan[] imageSpans = spannable.getSpans(0, spannable.length(), ImageSpan.class);
+        if (imageSpans != null && imageSpans.length > 0) {
+            try {
+                return Integer.valueOf(imageSpans[0].getSource());
+            } catch (Exception ignore) {
+            }
+        }
+
+        return 0;
     }
 
     private static int getColor(final Context context, final int index) {

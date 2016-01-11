@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -38,7 +39,8 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     private static final String EXTRA_TAG_ORDER = "tagOrder";
     private static final String EXTRA_PARENT_ID = "parentId";
     private static final String EXTRA_TAG_COLOR_INDEX = "tagColorIndex";
-    private static final String EXTRA_PARENT_TEXTS = "parentIds";
+    private static final String EXTRA_PARENT_TEXTS = "parentTexts";
+    private static final String EXTRA_ROOT_TAG_COLOR_ID = "rootTagColorId";
 
     private EditText editText;
     private Realm realm;
@@ -56,7 +58,16 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     private ActionMode actionMode;
     private ArrayList<String> parentHtmlTexts;
     private int tagOrder;
+    private int rootColorTagId;
 
+    private static int[] ICON_RES_IDS = {
+            R.drawable.ic_looks_one_white_24dp,
+            R.drawable.ic_looks_two_white_24dp,
+            R.drawable.ic_looks_3_white_24dp,
+            R.drawable.ic_looks_4_white_24dp,
+            R.drawable.ic_looks_5_white_24dp,
+            R.drawable.ic_looks_6_white_24dp,
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,21 +86,24 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         reservedBo = new ReservedBo(realm);
 
         parseIntent(getIntent());
+        adapter.setEnableChild(tagOrder < ICON_RES_IDS.length - 1);
         updateUI();
         updateReservedResults(reservedBo.load(parentId));
     }
 
     private void updateUI() {
+        toolbar.setTitle(R.string.tag_title);
+        toolbar.setNavigationIcon(ICON_RES_IDS[tagOrder]);
         final TextView tagTextView = (TextView) findViewById(R.id.tag_text);
         if (tagOrder > 0 && parentHtmlTexts != null && !parentHtmlTexts.isEmpty()) {
             tagButton.setVisibility(View.GONE);
             tagTextView.setVisibility(View.VISIBLE);
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            for (String htmlText : parentHtmlTexts) {
-                ssb.append(TextConverter.toCharSequence(htmlText, tagTextView));
-                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID));
-            }
-            tagTextView.setText(ssb);
+//            SpannableStringBuilder ssb = new SpannableStringBuilder();
+//            for (String htmlText : parentHtmlTexts) {
+//                ssb.append(TextConverter.toCharSequence(this, htmlText, tagTextView));
+//                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID + rootColorTagId));
+//            }
+//            tagTextView.setText(ssb);
         } else {
             colorIndex = ColorUtils.getRandomIndex();
             tagButton.setVisibility(View.VISIBLE);
@@ -160,7 +174,12 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             }
         } else {
             if (!event.isLongClick()) {
-                startActivity(ReservedActivity.createIntent(this, tagOrder+1, reservedResults.get(event.getPosition()), parentHtmlTexts));
+                if (tagOrder == 0) {
+                    Reserved reserved = reservedResults.get(event.getPosition());
+                    Spannable spannable = (Spannable)TextConverter.toCharSequence(this, reserved.getText(), reserved.getSpans(), null);
+                    rootColorTagId = ColorUtils.getTagColorId(this, spannable);
+                }
+                startActivity(ReservedActivity.createIntent(this, tagOrder + 1, reservedResults.get(event.getPosition()), parentHtmlTexts, rootColorTagId));
             } else {
                 adapter.setSelectedMode(true, event.getPosition());
                 actionMode = toolbar.startActionMode(new BaseActionModeCallback(this, R.menu.menu_onselected) {
@@ -169,6 +188,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
                         int id = item.getItemId();
                         if (id == R.id.action_delete) {
                             reservedBo.delete(adapter.getSelected());
+                            adapter.setSelectedMode(false, 0);
                             actionMode.finish();
                             return true;
                         } else if (id == R.id.action_select_all) {
@@ -236,11 +256,14 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             colorIndex = intent.getIntExtra(EXTRA_TAG_COLOR_INDEX, 0);
         }
         parentHtmlTexts = intent.getStringArrayListExtra(EXTRA_PARENT_TEXTS);
+        rootColorTagId = intent.getIntExtra(EXTRA_ROOT_TAG_COLOR_ID, 0);
     }
 
-    public static Intent createIntent(final Context context, final int tagOrder, final Reserved reserved, final ArrayList<String> parentHtmlTexts) {
+    public static Intent createIntent(final Context context, final int tagOrder, final Reserved reserved,
+                                      final ArrayList<String> parentHtmlTexts, final int rootTagColorId) {
         Intent intent = new Intent(context, ReservedActivity.class);
         intent.putExtra(EXTRA_TAG_ORDER, tagOrder);
+        intent.putExtra(EXTRA_ROOT_TAG_COLOR_ID, rootTagColorId);
         if (reserved != null) {
             intent.putExtra(EXTRA_PARENT_ID, reserved.getId());
             ArrayList<String> texts;
@@ -249,7 +272,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             } else {
                 texts = new ArrayList<>();
             }
-            texts.add(reserved.getHtmlText());
+            texts.add(reserved.getText());
             intent.putStringArrayListExtra(EXTRA_PARENT_TEXTS, texts);
         }
         return intent;

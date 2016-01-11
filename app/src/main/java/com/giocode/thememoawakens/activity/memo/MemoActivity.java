@@ -57,6 +57,7 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private View bottomToolbar;
     private ArrayList<String> parentHtmlTexts = new ArrayList<>();
     private Reserved currentSelected;
+    private int rootTagColorId = -1;
     private int tagOrder;
 
 
@@ -109,22 +110,25 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         int itemId = item.getItemId();
         if (itemId < currentReservedResults.size()) {
             if (currentSelected != null) {
-                parentHtmlTexts.add(currentSelected.getHtmlText());
+                parentHtmlTexts.add(currentSelected.getText());
             }
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             if (tagOrder > 0) {
-                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, editText, ColorUtils.DELIMITER_START_ID));
+                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, editText, ColorUtils.DELIMITER_START_ID + rootTagColorId));
             }
 
             currentSelected = currentReservedResults.get(itemId);
-            tagOrder++;
-            CharSequence charSequence = TextConverter.toCharSequence(currentSelected.getHtmlText(), editText);
+            CharSequence charSequence = TextConverter.toCharSequence(this, currentSelected.getText(), currentSelected.getSpans(), editText);
+            if (tagOrder == 0) {
+                rootTagColorId = ColorUtils.getTagColorId(this, (Spannable)charSequence);
+            }
+
             ssb.append(charSequence);
             editText.getText().insert(editText.getSelectionStart(), ssb);
-            currentReservedResults = reservedBo.load(currentReservedResults.get(itemId).getId());
             if (reservedResultsChangeListener != null) {
                 currentReservedResults.removeChangeListener(reservedResultsChangeListener);
             }
+            currentReservedResults = reservedBo.load(currentReservedResults.get(itemId).getId());
             if (reservedResultsChangeListener == null) {
                 reservedResultsChangeListener = new RealmChangeListener() {
                     @Override
@@ -132,14 +136,16 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         if (currentReservedResults.size() > 0) {
                             showPopupMenu(tagButtonView);
                         } else {
+                            reservedItemClicked = false;
                             clearTagLink();
                         }
                     }
                 };
             }
             currentReservedResults.addChangeListener(reservedResultsChangeListener);
+            tagOrder++;
         } else {
-            startActivity(ReservedActivity.createIntent(MemoActivity.this, tagOrder, currentSelected, parentHtmlTexts));
+            startActivity(ReservedActivity.createIntent(MemoActivity.this, tagOrder, currentSelected, parentHtmlTexts, rootTagColorId));
         }
         return true;
     }
@@ -245,6 +251,7 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     int id = item.getItemId();
                     if (id == R.id.action_delete) {
                         memoBo.delete(adapter.getSelectedMemos());
+                        adapter.setSelectedMode(false, 0);
                         actionMode.finish();
                         return true;
                     } else if (id == R.id.action_select_all) {
@@ -285,7 +292,7 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         Menu menu = popupMenu.getMenu();
         int itemId = 0;
         for (Reserved reserved : currentReservedResults) {
-            menu.addSubMenu(0, itemId++, 0, TextConverter.toCharSequence(reserved.getHtmlText(), null));
+            menu.addSubMenu(0, itemId++, 0, TextConverter.toCharSequence(this, reserved.getText(), reserved.getSpans(), null));
         }
         menu.addSubMenu(0, itemId++, 0, R.string.add);
         popupMenu.show();
