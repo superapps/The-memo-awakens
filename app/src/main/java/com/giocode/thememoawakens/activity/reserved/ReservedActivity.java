@@ -2,29 +2,31 @@ package com.giocode.thememoawakens.activity.reserved;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextWatcher;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.giocode.thememoawakens.R;
+import com.giocode.thememoawakens.activity.actionmode.BaseActionModeCallback;
+import com.giocode.thememoawakens.activity.event.ListItemClickEvent;
 import com.giocode.thememoawakens.bo.ReservedBo;
+import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Reserved;
 import com.giocode.thememoawakens.util.ColorUtils;
 import com.giocode.thememoawakens.util.TextConverter;
+import com.squareup.otto.Subscribe;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -32,8 +34,11 @@ import io.realm.RealmResults;
 
 public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
+
+    private static final String EXTRA_TAG_ORDER = "tagOrder";
     private static final String EXTRA_PARENT_ID = "parentId";
-    private static final String EXTRA_PARENT_RESERVED_TEXT = "parentReservedText";
+    private static final String EXTRA_TAG_COLOR_INDEX = "tagColorIndex";
+    private static final String EXTRA_PARENT_TEXTS = "parentIds";
 
     private EditText editText;
     private Realm realm;
@@ -46,71 +51,61 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     private boolean shouldScrollToBottom = true;
     private long parentId;
     private int colorIndex;
-    private FloatingActionButton colorChangeButton;
+    private ImageButton tagButton;
+    private Toolbar toolbar;
+    private ActionMode actionMode;
+    private ArrayList<String> parentHtmlTexts;
+    private int tagOrder;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reserved);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         listView = (RecyclerView) findViewById(R.id.reserved_list);
-        editText = (EditText) findViewById(R.id.reserved_input_edit);
+        editText = (EditText) findViewById(R.id.bottom_input_edit);
         adapter = new ReservedAdapter();
         listView.setAdapter(adapter);
+        tagButton = (ImageButton) findViewById(R.id.bottom_tag);
 
         realm = Realm.getDefaultInstance();
         reservedBo = new ReservedBo(realm);
-        colorIndex = ColorUtils.getRandomIndex();
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                TextConverter.changeBgColor(s, ColorUtils.getColor(ReservedActivity.this, colorIndex));
-            }
-        });
-
-        FloatingActionButton fabPlus = (FloatingActionButton) findViewById(R.id.fab_plus);
-        colorChangeButton = (FloatingActionButton) findViewById(R.id.fab_color);
-        fabPlus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                shouldScrollToBottom = true;
-                reservedBo.add(parentId, TextConverter.toHtmlString(editText.getText()));
-                editText.setText(null);
-            }
-        });
-        colorChangeButton.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
-        colorChangeButton.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
-        colorChangeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopupMenu();
-            }
-        });
         parseIntent(getIntent());
+        updateUI();
         updateReservedResults(reservedBo.load(parentId));
     }
 
+    private void updateUI() {
+        final TextView tagTextView = (TextView) findViewById(R.id.tag_text);
+        if (tagOrder > 0 && parentHtmlTexts != null && !parentHtmlTexts.isEmpty()) {
+            tagButton.setVisibility(View.GONE);
+            tagTextView.setVisibility(View.VISIBLE);
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            for (String htmlText : parentHtmlTexts) {
+                ssb.append(TextConverter.toCharSequence(htmlText, tagTextView));
+                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID));
+            }
+            tagTextView.setText(ssb);
+        } else {
+            colorIndex = ColorUtils.getRandomIndex();
+            tagButton.setVisibility(View.VISIBLE);
+            tagTextView.setVisibility(View.GONE);
+            tagButton.setImageDrawable(ColorUtils.getTagDrawable(this, null, colorIndex));
+        }
+    }
+
     private void showPopupMenu() {
-        PopupMenu popupMenu = new PopupMenu(this, colorChangeButton);
+        PopupMenu popupMenu = new PopupMenu(this, tagButton);
         popupMenu.setOnMenuItemClickListener(this);
         Menu menu = popupMenu.getMenu();
-        String currentText = editText.getText().length() > 0 ? editText.getText().toString() : getString(R.string.app_name);
 
         int itemId = 0;
         for (int i = 0; i < ColorUtils.COLORS_SIZE; i++) {
-            Spannable spannable = new SpannableStringBuilder(currentText);
-            TextConverter.changeBgColor(spannable, ColorUtils.getColor(this, i));
-            menu.addSubMenu(0, itemId++, 0, spannable);
+            menu.addSubMenu(0, itemId++, 0, ColorUtils.getTagSpannableStringBuilder(this, null, i));
         }
         popupMenu.show();
     }
@@ -118,16 +113,20 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         colorIndex = item.getItemId();
-        colorChangeButton.setBackgroundTintList(ColorUtils.getColorStateList(this, colorIndex));
-        colorChangeButton.setRippleColor(ColorUtils.getPressedColor(this, colorIndex));
-
-        TextConverter.changeBgColor(editText.getText(), ColorUtils.getColor(this, colorIndex));
+        tagButton.setImageDrawable(ColorUtils.getTagDrawable(this, null, colorIndex));
         return true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        EventBus.getInstance().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getInstance().unregister(this);
     }
 
     @Override
@@ -136,6 +135,70 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         closeReservedResults();
         realm.close();
     }
+
+    public void onClickTagButton(View view) {
+        showPopupMenu();
+    }
+
+    public void onClickSaveButton(View view) {
+        shouldScrollToBottom = true;
+        if (tagButton.getVisibility() == View.VISIBLE) {
+            SpannableStringBuilder ssb = ColorUtils.getTagSpannableStringBuilder(this, editText, colorIndex);
+            ssb.append(editText.getText());
+            reservedBo.add(parentId, TextConverter.toHtmlString(ssb));
+        } else {
+            reservedBo.add(parentId, TextConverter.toHtmlString(editText.getText()));
+        }
+        editText.setText(null);
+    }
+
+    @Subscribe
+    public void onItemClickEvent(ListItemClickEvent event) {
+        if (adapter.isSelectedMode()) {
+            if (!event.isLongClick()) {
+                adapter.toggleSelectItem(event.getPosition());
+            }
+        } else {
+            if (!event.isLongClick()) {
+                startActivity(ReservedActivity.createIntent(this, tagOrder+1, reservedResults.get(event.getPosition()), parentHtmlTexts));
+            } else {
+                adapter.setSelectedMode(true, event.getPosition());
+                actionMode = toolbar.startActionMode(new BaseActionModeCallback(this, R.menu.menu_onselected) {
+                    @Override
+                    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                        int id = item.getItemId();
+                        if (id == R.id.action_delete) {
+                            reservedBo.delete(adapter.getSelected());
+                            actionMode.finish();
+                            return true;
+                        } else if (id == R.id.action_select_all) {
+                            adapter.selectAll();
+                            updateActionModeTitle();
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public void onDestroyActionMode(ActionMode mode) {
+                        super.onDestroyActionMode(mode);
+                        actionMode = null;
+                        adapter.setSelectedMode(false, 0);
+                    }
+
+                });
+            }
+        }
+
+        updateActionModeTitle();
+    }
+
+    private void updateActionModeTitle() {
+        if (actionMode != null) {
+            actionMode.setTitle(String.valueOf(adapter.getSelectedCount()));
+        }
+    }
+
 
     private void updateReservedResults(final RealmResults<Reserved> reservedResults) {
         closeReservedResults();
@@ -158,7 +221,6 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         if (reservedResults != null && reservedResultsChangeListener != null) {
             reservedResults.addChangeListener(reservedResultsChangeListener);
         }
-
     }
 
     private void closeReservedResults() {
@@ -169,13 +231,26 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
 
     private void parseIntent(final Intent intent) {
         parentId = intent.getLongExtra(EXTRA_PARENT_ID, 0);
+        tagOrder = intent.getIntExtra(EXTRA_TAG_ORDER, 0);
+        if (tagOrder > 0) {
+            colorIndex = intent.getIntExtra(EXTRA_TAG_COLOR_INDEX, 0);
+        }
+        parentHtmlTexts = intent.getStringArrayListExtra(EXTRA_PARENT_TEXTS);
     }
 
-    public static Intent createIntent(final Context context, final Reserved parentReserved) {
+    public static Intent createIntent(final Context context, final int tagOrder, final Reserved reserved, final ArrayList<String> parentHtmlTexts) {
         Intent intent = new Intent(context, ReservedActivity.class);
-        if (parentReserved != null) {
-            intent.putExtra(EXTRA_PARENT_ID, parentReserved.getId());
-            intent.putExtra(EXTRA_PARENT_RESERVED_TEXT, parentReserved.getText());
+        intent.putExtra(EXTRA_TAG_ORDER, tagOrder);
+        if (reserved != null) {
+            intent.putExtra(EXTRA_PARENT_ID, reserved.getId());
+            ArrayList<String> texts;
+            if (parentHtmlTexts != null) {
+                texts = new ArrayList<>(parentHtmlTexts);
+            } else {
+                texts = new ArrayList<>();
+            }
+            texts.add(reserved.getHtmlText());
+            intent.putStringArrayListExtra(EXTRA_PARENT_TEXTS, texts);
         }
         return intent;
     }

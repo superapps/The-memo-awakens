@@ -1,11 +1,11 @@
-package com.giocode.thememoawakens.activity.memo.event;
+package com.giocode.thememoawakens.activity.event;
 
-public class MemoItemClickEvent {
+public class ListItemClickEvent {
 
     private final int position;
     private final boolean isLongClick;
 
-    public MemoItemClickEvent(int position, boolean isLongClick) {
+    public ListItemClickEvent(int position, boolean isLongClick) {
         this.position = position;
         this.isLongClick = isLongClick;
     }
@@ -20,7 +20,7 @@ public class MemoItemClickEvent {
 
     @Override
     public String toString() {
-        return "MemoItemClickEvent{" +
+        return "ListItemClickEvent{" +
                 "position=" + position +
                 ", isLongClick=" + isLongClick +
                 '}';

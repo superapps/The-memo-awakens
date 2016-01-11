@@ -18,8 +18,8 @@ public class Reserved extends RealmObject {
     private long parentId;
     private int childCount;
 
-    @Ignore
-    private CharSequence text;
+//    @Ignore
+//    private CharSequence text;
 
     public long getParentId() {
         return parentId;
@@ -53,12 +53,11 @@ public class Reserved extends RealmObject {
         this.childCount = childCount;
     }
 
-    public CharSequence getText() {
-        if (text == null) {
-            String htmlText = getHtmlText();
-            text = TextConverter.toCharSequence(htmlText);
-        }
-        return text;
-    }
-
+//    public CharSequence getText() {
+//        if (text == null) {
+//            String htmlText = getHtmlText();
+//            text = TextConverter.toCharSequence(htmlText);
+//        }
+//        return text;
+//    }
 }

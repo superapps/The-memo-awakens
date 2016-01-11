@@ -62,4 +62,8 @@ public class MemoBo {
 
 
     }
+
+    public RealmResults<Memo> search(String query) {
+        return dao.search(realm, query);
+    }
 }

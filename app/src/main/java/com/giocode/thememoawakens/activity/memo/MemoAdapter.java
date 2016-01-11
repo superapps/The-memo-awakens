@@ -13,10 +13,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.giocode.thememoawakens.R;
-import com.giocode.thememoawakens.activity.memo.event.MemoItemClickEvent;
+import com.giocode.thememoawakens.activity.event.ListItemClickEvent;
 import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Memo;
 import com.giocode.thememoawakens.util.DisplayUtils;
+import com.giocode.thememoawakens.util.TextConverter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -117,7 +118,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
 
         public void update(final int position, @NonNull final Memo memo, @Nullable final Memo previousMemo) {
             this.position = position;
-            memoText.setText(memo.getText());
+            memoText.setText(TextConverter.toCharSequence(memo.getHtmlText(), memoText));
             String timeString = DateUtils.formatDateTime(timeText.getContext(), memo.getTime(), DateUtils.FORMAT_SHOW_TIME);
             timeText.setText(timeString);
 
@@ -147,7 +148,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             int marginWidth = DisplayUtils.toPixel(memoText.getContext(), 14);
             int extraMargin = DisplayUtils.toPixel(memoText.getContext(), 38);
 
-            memoText.getPaint().breakText(memo.getText(), 0, memoText.getText().length(), false,
+            memoText.getPaint().breakText(TextConverter.toCharSequence(memo.getHtmlText(), memoText), 0, memoText.getText().length(), false,
                     displayWidth - marginWidth
                     , measuredText);
             float timeWidth = timeText.getPaint().measureText(timeString);
@@ -175,7 +176,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
 
         @Override
         public void onClick(View v) {
-            EventBus.postOnMainThread(new MemoItemClickEvent(position, false));
+            EventBus.postOnMainThread(new ListItemClickEvent(position, false));
         }
 
         @Override
@@ -183,7 +184,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             if (adapter.isSelectedMode()) {
                 return false;
             }
-            EventBus.postOnMainThread(new MemoItemClickEvent(position, true));
+            EventBus.postOnMainThread(new ListItemClickEvent(position, true));
             return true;
         }
     }

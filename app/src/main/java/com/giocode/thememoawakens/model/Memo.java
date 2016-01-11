@@ -15,8 +15,8 @@ public class Memo extends RealmObject {
     private long time;
     private String htmlText;
 
-    @Ignore
-    private CharSequence text;
+//    @Ignore
+//    private CharSequence text;
 
     public long getId() {
         return id;
@@ -42,11 +42,11 @@ public class Memo extends RealmObject {
         this.htmlText = htmlText;
     }
 
-    public CharSequence getText() {
-        if (text == null) {
-            String htmlText = getHtmlText();
-            text = TextConverter.toCharSequence(htmlText);
-        }
-        return text;
-    }
+//    public CharSequence getText() {
+//        if (text == null) {
+//            String htmlText = getHtmlText();
+//            text = TextConverter.toCharSequence(htmlText);
+//        }
+//        return text;
+//    }
 }

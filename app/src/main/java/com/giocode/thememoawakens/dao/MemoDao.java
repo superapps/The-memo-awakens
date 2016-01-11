@@ -1,12 +1,15 @@
 package com.giocode.thememoawakens.dao;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.giocode.thememoawakens.BuildConfig;
 import com.giocode.thememoawakens.model.Memo;
 
+import java.util.Iterator;
 import java.util.List;
 
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -45,8 +48,15 @@ public class MemoDao {
     }
 
     public void delete(List<Memo> selectedMemos) {
-        for (Memo memo : selectedMemos) {
-            memo.removeFromRealm();
+        selectedMemos.clear();
+    }
+
+    public RealmResults<Memo> search(final Realm realm, String query) {
+        if (TextUtils.isEmpty(query)) {
+            return getAsync(realm);
         }
+        return realm.where(Memo.class)
+                .contains("htmlText", query, Case.INSENSITIVE)
+                .findAllSortedAsync("time", Sort.ASCENDING);
     }
 }

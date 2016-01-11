@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import com.giocode.thememoawakens.dao.ReservedDao;
 import com.giocode.thememoawakens.model.Reserved;
 
+import java.util.List;
+
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -47,4 +49,17 @@ public class ReservedBo {
         return dao.getReserved(realm, parentId);
     }
 
+    public void delete(final List<Reserved> selected) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                dao.delete(selected);
+            }
+        });
+
+    }
+
+    public RealmResults<Reserved> loadParent(long[] parentIds) {
+        return dao.getParentReserved(realm, parentIds);
+    }
 }

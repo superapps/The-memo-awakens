@@ -2,7 +2,11 @@ package com.giocode.thememoawakens.dao;
 
 import com.giocode.thememoawakens.model.Reserved;
 
+import java.util.Iterator;
+import java.util.List;
+
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public class ReservedDao {
@@ -44,11 +48,27 @@ public class ReservedDao {
                 .findAllAsync();
     }
 
+    public RealmResults<Reserved> getParentReserved(final Realm realm, final long[] parentIds) {
+        RealmQuery<Reserved> query = realm.where(Reserved.class);
+        int index = 0;
+        for (long parentId : parentIds) {
+            if (index > 0) {
+                query.or();
+            }
+            query.equalTo("id", parentId);
+            index++;
+        }
+        return query.findAllAsync();
+    }
+
+
     public void clearAll(final Realm realm) {
         final RealmResults<Reserved> realmResults = realm.where(Reserved.class)
                 .findAll();
         realmResults.clear();
     }
 
-
+    public void delete(List<Reserved> selected) {
+        selected.clear();
+    }
 }
