@@ -98,12 +98,12 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         if (tagOrder > 0 && parentHtmlTexts != null && !parentHtmlTexts.isEmpty()) {
             tagButton.setVisibility(View.GONE);
             tagTextView.setVisibility(View.VISIBLE);
-//            SpannableStringBuilder ssb = new SpannableStringBuilder();
-//            for (String htmlText : parentHtmlTexts) {
-//                ssb.append(TextConverter.toCharSequence(this, htmlText, tagTextView));
-//                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID + rootColorTagId));
-//            }
-//            tagTextView.setText(ssb);
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            for (String htmlText : parentHtmlTexts) {
+                ssb.append(TextConverter.toCharSequence(htmlText, tagTextView));
+                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID + rootColorTagId));
+            }
+            tagTextView.setText(ssb);
         } else {
             colorIndex = ColorUtils.getRandomIndex();
             tagButton.setVisibility(View.VISIBLE);
@@ -159,11 +159,15 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         if (tagButton.getVisibility() == View.VISIBLE) {
             SpannableStringBuilder ssb = ColorUtils.getTagSpannableStringBuilder(this, editText, colorIndex);
             ssb.append(editText.getText());
-            reservedBo.add(parentId, TextConverter.toHtmlString(ssb));
+            reservedBo.add(parentId, TextConverter.toTextSpanInfo(ssb));
         } else {
-            reservedBo.add(parentId, TextConverter.toHtmlString(editText.getText()));
+            reservedBo.add(parentId, TextConverter.toTextSpanInfo(editText.getText()));
         }
         editText.setText(null);
+        if (tagOrder == 0) {
+            colorIndex = ColorUtils.getRandomIndex();
+            tagButton.setImageDrawable(ColorUtils.getTagDrawable(this, null, colorIndex));
+        }
     }
 
     @Subscribe
@@ -231,7 +235,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
                 public void onChange() {
                     adapter.notifyDataSetChanged();
                     if (shouldScrollToBottom && reservedResults.size() > 0) {
-                        listView.smoothScrollToPosition(reservedResults.size() - 1);
+                        listView.smoothScrollToPosition(reservedResults.size());
                     }
                     shouldScrollToBottom = false;
                 }
@@ -272,7 +276,8 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             } else {
                 texts = new ArrayList<>();
             }
-            texts.add(reserved.getText());
+            Spannable spannable = (Spannable) TextConverter.toCharSequence(context, reserved.getText(), reserved.getSpans(), null);
+            texts.add(TextConverter.toHtmlString(spannable));
             intent.putStringArrayListExtra(EXTRA_PARENT_TEXTS, texts);
         }
         return intent;

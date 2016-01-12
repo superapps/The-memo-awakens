@@ -28,9 +28,7 @@ import io.realm.RealmList;
 
 public class TextConverter {
 
-    public static LruCache<String, CharSequence> CACHE = new LruCache<>(100);
-
-    public static Pair<String, RealmList<Span>> toHtmlString(final Spannable spannable) {
+    public static Pair<String, RealmList<Span>> toTextSpanInfo(final Spannable spannable) {
         if (spannable == null || spannable.length() == 0) {
             return null;
         }
@@ -70,34 +68,44 @@ public class TextConverter {
                 }
             }
         }
-
-//        StringBuilder cacheKey = new StringBuilder(htmlString);
-//        if (textView != null) {
-//            cacheKey.append(textView.getLineHeight());
-//        }
-//        CharSequence cache = CACHE.get(cacheKey.toString());
-//        if (cache != null) {
-//            return cache;
-//        }
-
-
-//        CharSequence text = Html.fromHtml(htmlString, new Html.ImageGetter() {
-//            @Override
-//            public Drawable getDrawable(String source) {
-//                try {
-//                    int colorIndex = Integer.valueOf(source);
-//                    return ColorUtils.getTagDrawable(AMemoApplication.applicationContext, textView, colorIndex);
-//                } catch (Exception ignore) {
-//                }
-//                return null;
-//            }
-//        }, null);
-
-//        // remove last line feed because of <p></p> tag
-//        while (text.charAt(text.length() - 1) == '\n') {
-//            text = text.subSequence(0, text.length() - 1);
-//        }
-//        CACHE.put(cacheKey.toString(), text);
         return ssb;
+    }
+
+    public static String toHtmlString(final Spannable spannable) {
+        if (spannable == null || spannable.length() == 0) {
+            return null;
+        }
+
+        CharacterStyle[] allSpans = spannable.getSpans(0, spannable.length(), CharacterStyle.class);
+        for (CharacterStyle span : allSpans) {
+            if (span instanceof UnderlineSpan) {
+                spannable.removeSpan(span);
+            }
+        }
+        String htmlText = Html.toHtml(spannable);
+        return htmlText.replace("\n", "");
+    }
+
+    public static CharSequence toCharSequence(final String htmlString, final TextView textView) {
+        if (TextUtils.isEmpty(htmlString)) {
+            return null;
+        }
+        CharSequence text = Html.fromHtml(htmlString, new Html.ImageGetter() {
+            @Override
+            public Drawable getDrawable(String source) {
+                try {
+                    int colorIndex = Integer.valueOf(source);
+                    return ColorUtils.getTagDrawable(AMemoApplication.applicationContext, textView, colorIndex);
+                } catch (Exception ignore) {
+                }
+                return null;
+            }
+        }, null);
+
+        // remove last line feed because of <p></p> tag
+        while(text.charAt(text.length() - 1) == '\n') {
+            text = text.subSequence(0, text.length() - 1);
+        }
+        return text;
     }
 }

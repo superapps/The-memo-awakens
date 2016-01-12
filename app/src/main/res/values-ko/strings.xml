@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">택메모</string>
+    <string name="tag_title">태그</string>
+    <string name="action_wipe_all_memos">전체삭제</string>
+    <string name="title_activity_memo">MemoActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="add">추가…</string>
+    <string name="delete">삭제</string>
+    <string name="select_all">전체선택</string>
+    <string name="action_search">검색</string>
+</resources>

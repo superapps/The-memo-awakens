@@ -3,7 +3,6 @@ package com.giocode.thememoawakens.activity.memo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -46,12 +45,13 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private ReservedBo reservedBo;
     private RealmResults<Memo> memoResults;
     private RealmChangeListener memoResultsChangeListener;
-    private boolean shouldScrollToBottom;
+    private boolean shouldScrollToBottom = true;
 
     private RealmResults<Reserved> reservedResults;
     private RealmResults<Reserved> currentReservedResults;
     private RealmChangeListener reservedResultsChangeListener;
     private boolean reservedItemClicked;
+    private boolean waitingMenuItemLoading;
     private ActionMode actionMode;
     private View tagButtonView;
     private View bottomToolbar;
@@ -110,7 +110,8 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         int itemId = item.getItemId();
         if (itemId < currentReservedResults.size()) {
             if (currentSelected != null) {
-                parentHtmlTexts.add(currentSelected.getText());
+                Spannable spannable = (Spannable) TextConverter.toCharSequence(this, currentSelected.getText(), currentSelected.getSpans(), null);
+                parentHtmlTexts.add(TextConverter.toHtmlString(spannable));
             }
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             if (tagOrder > 0) {
@@ -129,16 +130,18 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 currentReservedResults.removeChangeListener(reservedResultsChangeListener);
             }
             currentReservedResults = reservedBo.load(currentReservedResults.get(itemId).getId());
+            waitingMenuItemLoading = true;
             if (reservedResultsChangeListener == null) {
                 reservedResultsChangeListener = new RealmChangeListener() {
                     @Override
                     public void onChange() {
-                        if (currentReservedResults.size() > 0) {
+                        if (currentReservedResults.size() > 0 && waitingMenuItemLoading) {
                             showPopupMenu(tagButtonView);
                         } else {
                             reservedItemClicked = false;
                             clearTagLink();
                         }
+                        waitingMenuItemLoading = false;
                     }
                 };
             }
@@ -231,7 +234,7 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public void onClickSaveButton(View view) {
         shouldScrollToBottom = true;
-        memoBo.add(TextConverter.toHtmlString(editText.getText()), System.currentTimeMillis());
+        memoBo.add(TextConverter.toTextSpanInfo(editText.getText()), System.currentTimeMillis());
         editText.setText(null);
     }
 
@@ -310,7 +313,7 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 public void onChange() {
                     adapter.notifyDataSetChanged();
                     if (shouldScrollToBottom && memoResults.size() > 0) {
-                        listView.smoothScrollToPosition(memoResults.size() - 1);
+                        listView.smoothScrollToPosition(memoResults.size());
                     }
                     shouldScrollToBottom = false;
                 }
