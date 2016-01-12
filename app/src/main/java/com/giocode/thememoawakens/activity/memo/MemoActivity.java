@@ -1,14 +1,15 @@
 package com.giocode.thememoawakens.activity.memo;
 
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,25 +17,21 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.giocode.thememoawakens.R;
+import com.giocode.thememoawakens.activity.TagPopupMenuHelper;
 import com.giocode.thememoawakens.activity.actionmode.BaseActionModeCallback;
 import com.giocode.thememoawakens.activity.event.ListItemClickEvent;
 import com.giocode.thememoawakens.activity.reserved.ReservedActivity;
 import com.giocode.thememoawakens.bo.MemoBo;
-import com.giocode.thememoawakens.bo.ReservedBo;
 import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Memo;
-import com.giocode.thememoawakens.model.Reserved;
-import com.giocode.thememoawakens.util.ColorUtils;
 import com.giocode.thememoawakens.util.TextConverter;
 import com.squareup.otto.Subscribe;
-
-import java.util.ArrayList;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
+public class MemoActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private EditText editText;
@@ -42,24 +39,13 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private MemoAdapter adapter;
     private RecyclerView listView;
     private MemoBo memoBo;
-    private ReservedBo reservedBo;
     private RealmResults<Memo> memoResults;
     private RealmChangeListener memoResultsChangeListener;
     private boolean shouldScrollToBottom = true;
 
-    private RealmResults<Reserved> reservedResults;
-    private RealmResults<Reserved> currentReservedResults;
-    private RealmChangeListener reservedResultsChangeListener;
-    private boolean reservedItemClicked;
-    private boolean waitingMenuItemLoading;
     private ActionMode actionMode;
-    private View tagButtonView;
     private View bottomToolbar;
-    private ArrayList<String> parentHtmlTexts = new ArrayList<>();
-    private Reserved currentSelected;
-    private int rootTagColorId = -1;
-    private int tagOrder;
-
+    private TagPopupMenuHelper tagPopupMenuHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +64,9 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         realm = Realm.getDefaultInstance();
         memoBo = new MemoBo(realm);
-        reservedBo = new ReservedBo(realm);
+        tagPopupMenuHelper = new TagPopupMenuHelper(this, realm, editText);
 
         updateMemoResults(memoBo.load());
-        updateReservedResult(reservedBo.load(0));
     }
 
 
@@ -102,73 +87,6 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onDestroy();
         closeMemoResults();
         realm.close();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        reservedItemClicked = true;
-        int itemId = item.getItemId();
-        if (itemId < currentReservedResults.size()) {
-            if (currentSelected != null) {
-                Spannable spannable = (Spannable) TextConverter.toCharSequence(this, currentSelected.getText(), currentSelected.getSpans(), null);
-                parentHtmlTexts.add(TextConverter.toHtmlString(spannable));
-            }
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            if (tagOrder > 0) {
-                ssb.append(ColorUtils.getTagSpannableStringBuilder(this, editText, ColorUtils.DELIMITER_START_ID + rootTagColorId));
-            }
-
-            currentSelected = currentReservedResults.get(itemId);
-            CharSequence charSequence = TextConverter.toCharSequence(this, currentSelected.getText(), currentSelected.getSpans(), editText);
-            if (tagOrder == 0) {
-                rootTagColorId = ColorUtils.getTagColorId(this, (Spannable)charSequence);
-            }
-
-            ssb.append(charSequence);
-            editText.getText().insert(editText.getSelectionStart(), ssb);
-            if (reservedResultsChangeListener != null) {
-                currentReservedResults.removeChangeListener(reservedResultsChangeListener);
-            }
-            currentReservedResults = reservedBo.load(currentReservedResults.get(itemId).getId());
-            waitingMenuItemLoading = true;
-            if (reservedResultsChangeListener == null) {
-                reservedResultsChangeListener = new RealmChangeListener() {
-                    @Override
-                    public void onChange() {
-                        if (currentReservedResults.size() > 0 && waitingMenuItemLoading) {
-                            showPopupMenu(tagButtonView);
-                        } else {
-                            reservedItemClicked = false;
-                            clearTagLink();
-                        }
-                        waitingMenuItemLoading = false;
-                    }
-                };
-            }
-            currentReservedResults.addChangeListener(reservedResultsChangeListener);
-            tagOrder++;
-        } else {
-            startActivity(ReservedActivity.createIntent(MemoActivity.this, tagOrder, currentSelected, parentHtmlTexts, rootTagColorId));
-        }
-        return true;
-    }
-
-    @Override
-    public void onDismiss(PopupMenu menu) {
-        clearTagLink();
-    }
-
-    private void clearTagLink() {
-        if (!reservedItemClicked) {
-            if (reservedResultsChangeListener != null) {
-                currentReservedResults.removeChangeListener(reservedResultsChangeListener);
-            }
-            currentReservedResults = reservedResults;
-            currentSelected = null;
-            parentHtmlTexts.clear();
-            tagOrder = 0;
-        }
-        reservedItemClicked = false;
     }
 
     SearchView searchView;
@@ -223,12 +141,10 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     public void onClickTagButton(View view) {
-        tagButtonView = view;
-        if (reservedResults.size() == 0) {
+        if (tagPopupMenuHelper.isEmptyTag()) {
             startActivity(ReservedActivity.createIntent(MemoActivity.this, 0));
-            return;
         } else {
-            showPopupMenu(tagButtonView);
+            tagPopupMenuHelper.showPopupMenu(view);
         }
     }
 
@@ -276,6 +192,18 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } else {
             if (adapter.isSelectedMode()) {
                 adapter.toggleSelectItem(event.getPosition());
+            } else {
+                Memo memo = memoResults.get(event.getPosition());
+                View memoView = event.getItemView().findViewById(R.id.memo_text);
+                View memoTimeView = event.getItemView().findViewById(R.id.memo_time);
+
+                Pair<View, String> p1 = Pair.create(memoView, getString(R.string.transition_name_memo));
+                Pair<View, String> p2 = Pair.create(memoTimeView, getString(R.string.transition_name_time));
+                Pair<View, String> p3 = Pair.create(bottomToolbar, getString(R.string.transition_name_bottom));
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, p1, p2, p3);
+                Spannable spannable = (Spannable) TextConverter.toCharSequence(this, memo.getText(), memo.getSpans(), null);
+                ActivityCompat.startActivity(this
+                        , EditMemoActivity.createIntent(this, memo.getId(), TextConverter.toHtmlString(spannable), memo.getTime()), options.toBundle());
             }
         }
 
@@ -286,19 +214,6 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         if (actionMode != null) {
             actionMode.setTitle(String.valueOf(adapter.getSelectedCount()));
         }
-    }
-
-    private void showPopupMenu(View view) {
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.setOnMenuItemClickListener(MemoActivity.this);
-        popupMenu.setOnDismissListener(MemoActivity.this);
-        Menu menu = popupMenu.getMenu();
-        int itemId = 0;
-        for (Reserved reserved : currentReservedResults) {
-            menu.addSubMenu(0, itemId++, 0, TextConverter.toCharSequence(this, reserved.getText(), reserved.getSpans(), null));
-        }
-        menu.addSubMenu(0, itemId++, 0, R.string.add);
-        popupMenu.show();
     }
 
     private void updateMemoResults(final RealmResults<Memo> memoResults) {
@@ -326,17 +241,10 @@ public class MemoActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     }
 
-    private void updateReservedResult(RealmResults<Reserved> reservedResults) {
-        this.reservedResults = reservedResults;
-        this.currentReservedResults = reservedResults;
-    }
-
     private void closeMemoResults() {
         if (memoResults != null && memoResultsChangeListener != null) {
             memoResults.removeChangeListener(memoResultsChangeListener);
         }
-        if (currentReservedResults != null && reservedResultsChangeListener != null) {
-            currentReservedResults.removeChangeListener(reservedResultsChangeListener);
-        }
+        tagPopupMenuHelper.close();
     }
 }

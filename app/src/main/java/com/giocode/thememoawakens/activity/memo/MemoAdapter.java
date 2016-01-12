@@ -177,7 +177,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
 
         @Override
         public void onClick(View v) {
-            EventBus.postOnMainThread(new ListItemClickEvent(position, false));
+            EventBus.postOnMainThread(new ListItemClickEvent(itemView, position, false));
         }
 
         @Override
@@ -185,7 +185,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoViewHolder
             if (adapter.isSelectedMode()) {
                 return false;
             }
-            EventBus.postOnMainThread(new ListItemClickEvent(position, true));
+            EventBus.postOnMainThread(new ListItemClickEvent(itemView, position, true));
             return true;
         }
     }

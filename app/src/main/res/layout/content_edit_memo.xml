@@ -1,51 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.giocode.thememoawakens.activity.memo.MemoActivity"
-    tools:showIn="@layout/activity_memo">
+    tools:context="com.giocode.thememoawakens.activity.memo.EditMemoActivity"
+    tools:showIn="@layout/activity_edit_memo">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/memo_list"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_above="@+id/memo_toolbar"
-        android:orientation="vertical"
         android:layout_weight="1"
-        app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+        android:orientation="vertical"
+        android:padding="@dimen/memo_item_padding">
+
+        <EditText
+            android:id="@+id/memo_edit"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:cursorVisible="false"
+            android:gravity="top"
+            android:transitionName="@string/transition_name_memo"
+            />
+
+        <TextView
+            android:id="@+id/memo_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/memo_text"
+            android:layout_gravity="right"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:transitionName="@string/transition_name_time"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/memo_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
         android:background="@color/colorBottom"
         android:elevation="3dp"
+        android:gravity="right"
+        android:orientation="horizontal"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:transitionName="@string/transition_name_bottom">
 
-        <EditText
-            android:id="@+id/memo_input_edit"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:maxLines="4"
-            android:minHeight="30dp" />
 
         <ImageButton
             android:id="@+id/memo_link_tag"
             style="?android:attr/actionButtonStyle"
             android:layout_width="36dp"
             android:layout_height="wrap_content"
+            android:onClick="onClickTagButton"
             android:src="@drawable/ic_label_black_24dp"
             android:tint="@color/colorButton"
-            android:onClick="onClickTagButton"
             />
 
         <ImageButton
@@ -53,9 +67,11 @@
             style="?android:attr/actionButtonStyle"
             android:layout_width="36dp"
             android:layout_height="wrap_content"
+            android:onClick="onClickSaveButton"
             android:src="@drawable/ic_thumb_up_black_24dp"
             android:tint="@color/colorButton"
-            android:onClick="onClickSaveButton"
             />
     </LinearLayout>
+
 </LinearLayout>
+

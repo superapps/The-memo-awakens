@@ -2,6 +2,7 @@ package com.giocode.thememoawakens.activity.reserved;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,6 +77,8 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         setContentView(R.layout.activity_reserved);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         listView = (RecyclerView) findViewById(R.id.reserved_list);
         editText = (EditText) findViewById(R.id.bottom_input_edit);
@@ -92,13 +96,17 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     }
 
     private void updateUI() {
-        toolbar.setTitle(R.string.tag_title);
-        toolbar.setNavigationIcon(ICON_RES_IDS[tagOrder]);
+        SpannableStringBuilder ssb = new SpannableStringBuilder("   " + getString(R.string.tag_title));
+        Drawable d = getResources().getDrawable(ICON_RES_IDS[tagOrder]);
+        d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+        ssb.setSpan(new ImageSpan(d), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        getSupportActionBar().setTitle(ssb);
+//        toolbar.setNavigationIcon(ICON_RES_IDS[tagOrder]);
         final TextView tagTextView = (TextView) findViewById(R.id.tag_text);
         if (tagOrder > 0 && parentHtmlTexts != null && !parentHtmlTexts.isEmpty()) {
             tagButton.setVisibility(View.GONE);
             tagTextView.setVisibility(View.VISIBLE);
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            ssb = new SpannableStringBuilder();
             for (String htmlText : parentHtmlTexts) {
                 ssb.append(TextConverter.toCharSequence(htmlText, tagTextView));
                 ssb.append(ColorUtils.getTagSpannableStringBuilder(this, tagTextView, ColorUtils.DELIMITER_START_ID + rootColorTagId));
@@ -122,6 +130,17 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             menu.addSubMenu(0, itemId++, 0, ColorUtils.getTagSpannableStringBuilder(this, null, i));
         }
         popupMenu.show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                supportFinishAfterTransition();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

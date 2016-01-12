@@ -72,4 +72,19 @@ public class MemoBo {
         RealmResults<Memo> results = dao.search(realm, query);
         return results;
     }
+
+    public void update(final long memoId, final Pair<String, RealmList<Span>> memoInfo
+            , final long memoTime, final Realm.Transaction.Callback callback) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Memo memo = new Memo();
+                memo.setId(memoId);
+                memo.setText(memoInfo.first);
+                memo.setSpans(memoInfo.second);
+                memo.setTime(memoTime);
+                dao.insertOrUpdate(realm, memo);
+            }
+        }, callback);
+    }
 }

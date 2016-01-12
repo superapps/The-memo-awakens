@@ -8,4 +8,8 @@
     <string name="delete">Delete</string>
     <string name="select_all">Select all</string>
     <string name="action_search">Search</string>
+    <string name="title_activity_edit_memo">EditMemoActivity</string>
+    <string name="transition_name_time">tn_time</string>
+    <string name="transition_name_bottom">tn_bottom</string>
+    <string name="transition_name_memo">tn_memo</string>
 </resources>

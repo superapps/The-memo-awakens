@@ -19,12 +19,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="10dp">
+        android:padding="@dimen/memo_item_padding">
 
         <TextView
             android:id="@+id/memo_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:transitionName="@string/transition_name_memo"
             android:textAppearance="@android:style/TextAppearance.Medium"
             />
 
@@ -34,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/memo_text"
+            android:transitionName="@string/transition_name_time"
             android:textAppearance="@android:style/TextAppearance.Small" />
 
     </RelativeLayout>

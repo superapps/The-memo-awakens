@@ -138,7 +138,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
         @Override
         public void onClick(View v) {
             if (adapter.enableChild) {
-                EventBus.postOnMainThread(new ListItemClickEvent(position, false));
+                EventBus.postOnMainThread(new ListItemClickEvent(itemView, position, false));
             }
         }
 
@@ -147,7 +147,7 @@ public class ReservedAdapter extends RecyclerView.Adapter<ReservedAdapter.Reserv
             if (adapter.isSelectedMode()) {
                 return false;
             }
-            EventBus.postOnMainThread(new ListItemClickEvent(position, true));
+            EventBus.postOnMainThread(new ListItemClickEvent(itemView, position, true));
             return true;
         }
     }

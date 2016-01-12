@@ -21,8 +21,13 @@
         </activity>
         <activity
             android:name=".activity.reserved.ReservedActivity"
-            android:label="@string/tag_title"
             android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".activity.memo.EditMemoActivity"
+            android:label="@string/title_activity_edit_memo"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
     </application>
 
