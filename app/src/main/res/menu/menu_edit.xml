@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.giocode.thememoawakens.MainActivity" >
+    tools:context="com.giocode.thememoawakens.activity.memo.EditMemoActivity" >
     <item android:id="@+id/action_chnage_time"
         android:title="@string/action_change_time"
         android:icon="@drawable/ic_query_builder_white_24dp"
