@@ -1,17 +1,18 @@
 <resources>
+    <string name="title_activity_memo" translatable="false">MemoActivity</string>
+    <string name="title_activity_register" translatable="false">RegisterActivity</string>
+    <string name="title_activity_edit_memo" translatable="false">EditMemoActivity</string>
+    <string name="transition_name_time" translatable="false">tn_time</string>
+    <string name="transition_name_bottom" translatable="false">tn_bottom</string>
+    <string name="transition_name_memo" translatable="false">tn_memo</string>
+
     <string name="app_name">Tag Memo</string>
     <string name="tag_title">Tag</string>
     <string name="action_wipe_all_memos">Delete all</string>
-    <string name="title_activity_memo">MemoActivity</string>
-    <string name="title_activity_register">RegisterActivity</string>
     <string name="add">Add…</string>
     <string name="delete">Delete</string>
     <string name="select_all">Select all</string>
     <string name="action_search">Search</string>
-    <string name="title_activity_edit_memo">EditMemoActivity</string>
-    <string name="transition_name_time">tn_time</string>
-    <string name="transition_name_bottom">tn_bottom</string>
-    <string name="transition_name_memo">tn_memo</string>
     <string name="action_change_time">Change time</string>
     <string name="action_change_date">Change date</string>
 </resources>

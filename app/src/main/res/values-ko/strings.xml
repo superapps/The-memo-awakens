@@ -2,16 +2,10 @@
     <string name="app_name">택메모</string>
     <string name="tag_title">태그</string>
     <string name="action_wipe_all_memos">전체삭제</string>
-    <string name="title_activity_memo">MemoActivity</string>
-    <string name="title_activity_register">RegisterActivity</string>
     <string name="add">추가…</string>
     <string name="delete">삭제</string>
     <string name="select_all">전체선택</string>
     <string name="action_search">검색</string>
-    <string name="title_activity_edit_memo">EditMemoActivity</string>
-    <string name="transition_name_time">tn_time</string>
-    <string name="transition_name_bottom">tn_bottom</string>
-    <string name="transition_name_memo">tn_memo</string>
     <string name="action_change_time">시간변경</string>
     <string name="action_change_date">날짜변경</string>
 
