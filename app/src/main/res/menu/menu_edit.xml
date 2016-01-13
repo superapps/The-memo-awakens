@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.giocode.thememoawakens.MainActivity" >
+    <item android:id="@+id/action_chnage_time"
+        android:title="@string/action_change_time"
+        android:icon="@drawable/ic_query_builder_white_24dp"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_change_date"
+        android:title="@string/action_change_date"
+        android:icon="@drawable/ic_date_range_white_24dp"
+        app:showAsAction="ifRoom" />
+</menu>

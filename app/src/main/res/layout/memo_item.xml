@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/memo_text"
-            android:transitionName="@string/transition_name_time"
             android:textAppearance="@android:style/TextAppearance.Small" />
 
     </RelativeLayout>

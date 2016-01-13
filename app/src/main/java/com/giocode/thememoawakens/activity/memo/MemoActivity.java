@@ -198,9 +198,8 @@ public class MemoActivity extends AppCompatActivity {
                 View memoTimeView = event.getItemView().findViewById(R.id.memo_time);
 
                 Pair<View, String> p1 = Pair.create(memoView, getString(R.string.transition_name_memo));
-                Pair<View, String> p2 = Pair.create(memoTimeView, getString(R.string.transition_name_time));
-                Pair<View, String> p3 = Pair.create(bottomToolbar, getString(R.string.transition_name_bottom));
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, p1, p2, p3);
+                Pair<View, String> p2 = Pair.create(bottomToolbar, getString(R.string.transition_name_bottom));
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, p1, p2);
                 Spannable spannable = (Spannable) TextConverter.toCharSequence(this, memo.getText(), memo.getSpans(), null);
                 ActivityCompat.startActivity(this
                         , EditMemoActivity.createIntent(this, memo.getId(), TextConverter.toHtmlString(spannable), memo.getTime()), options.toBundle());

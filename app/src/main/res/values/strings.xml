@@ -12,4 +12,6 @@
     <string name="transition_name_time">tn_time</string>
     <string name="transition_name_bottom">tn_bottom</string>
     <string name="transition_name_memo">tn_memo</string>
+    <string name="action_change_time">Change time</string>
+    <string name="action_change_date">Change date</string>
 </resources>
