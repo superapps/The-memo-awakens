@@ -21,3 +21,4 @@
 -keep @io.realm.internal.Keep class * { *; }
 -dontwarn javax.**
 -dontwarn io.realm.**
+-keep class android.support.v7.widget.** { *; }

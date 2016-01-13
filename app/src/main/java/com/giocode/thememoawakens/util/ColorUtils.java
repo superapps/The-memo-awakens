@@ -42,6 +42,7 @@ public class ColorUtils {
         } else {
             tagDrawable = DrawableCompat.wrap(context.getResources().getDrawable(R.drawable.ic_label_black_24dp));
         }
+        tagDrawable = tagDrawable.mutate();
         DrawableCompat.setTint(tagDrawable, ColorUtils.getColor(context, id));
         if (textView != null) {
             int lineHeight = textView.getLineHeight();
