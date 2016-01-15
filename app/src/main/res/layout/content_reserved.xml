@@ -59,9 +59,9 @@
                 style="?android:attr/actionButtonStyle"
                 android:layout_width="36dp"
                 android:layout_height="wrap_content"
-                android:onClick="onClickSaveButton"
                 android:src="@drawable/ic_thumb_up_black_24dp"
-                android:tint="@color/colorButton" />
+                android:onClick="onClickSaveButton"
+                />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

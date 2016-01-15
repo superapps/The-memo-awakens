@@ -1,5 +1,7 @@
 package com.giocode.thememoawakens.activity.memo;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -9,12 +11,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Spannable;
+import android.text.TextWatcher;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.giocode.thememoawakens.R;
 import com.giocode.thememoawakens.activity.TagPopupMenuHelper;
@@ -24,6 +29,7 @@ import com.giocode.thememoawakens.activity.reserved.ReservedActivity;
 import com.giocode.thememoawakens.bo.MemoBo;
 import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Memo;
+import com.giocode.thememoawakens.util.DrawableUtils;
 import com.giocode.thememoawakens.util.TextConverter;
 import com.squareup.otto.Subscribe;
 
@@ -31,7 +37,7 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class MemoActivity extends AppCompatActivity {
+public class MemoActivity extends AppCompatActivity implements TextWatcher {
 
     private Toolbar toolbar;
     private EditText editText;
@@ -46,6 +52,8 @@ public class MemoActivity extends AppCompatActivity {
     private ActionMode actionMode;
     private View bottomToolbar;
     private TagPopupMenuHelper tagPopupMenuHelper;
+    private ImageButton saveButton;
+    private int currentSaveButtonTineColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +62,10 @@ public class MemoActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        saveButton = (ImageButton) findViewById(R.id.bottom_save);
         listView = (RecyclerView) findViewById(R.id.memo_list);
         editText = (EditText) findViewById(R.id.memo_input_edit);
+        editText.addTextChangedListener(this);
         adapter = new MemoAdapter();
         listView.setAdapter(adapter);
 //        LinearLayoutManager layoutManager = (LinearLayoutManager) listView.getLayoutManager();
@@ -67,6 +77,7 @@ public class MemoActivity extends AppCompatActivity {
         tagPopupMenuHelper = new TagPopupMenuHelper(this, realm, editText);
 
         updateMemoResults(memoBo.load());
+        updateSaveButton();
     }
 
 
@@ -245,5 +256,27 @@ public class MemoActivity extends AppCompatActivity {
             memoResults.removeChangeListener(memoResultsChangeListener);
         }
         tagPopupMenuHelper.close();
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        updateSaveButton();
+    }
+
+    private void updateSaveButton() {
+        int color = editText.getText().length() > 0 ? getResources().getColor(R.color.colorPrimary) : getResources().getColor(R.color.colorButton);
+        if (currentSaveButtonTineColor == color) {
+            return;
+        }
+        currentSaveButtonTineColor = color;
+        saveButton.setImageDrawable(DrawableUtils.getTintDrawable(this, R.drawable.ic_thumb_up_black_24dp, color, 0));
     }
 }

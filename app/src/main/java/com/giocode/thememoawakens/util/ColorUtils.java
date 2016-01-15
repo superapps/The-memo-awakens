@@ -2,7 +2,6 @@ package com.giocode.thememoawakens.util;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -35,24 +34,15 @@ public class ColorUtils {
     }
 
     public static Drawable getTagDrawable(final Context context, final TextView textView, int id) {
-        Drawable tagDrawable;
+        int drawableResId;
         if (id >= DELIMITER_START_ID) {
-            tagDrawable = DrawableCompat.wrap(context.getResources().getDrawable(R.drawable.ic_keyboard_arrow_right_black_24dp));
+            drawableResId = R.drawable.ic_keyboard_arrow_right_black_24dp;
             id -= DELIMITER_START_ID;
         } else {
-            tagDrawable = DrawableCompat.wrap(context.getResources().getDrawable(R.drawable.ic_label_black_24dp));
+            drawableResId = R.drawable.ic_label_black_24dp;
         }
-        tagDrawable = tagDrawable.mutate();
-        DrawableCompat.setTint(tagDrawable, ColorUtils.getColor(context, id));
-        if (textView != null) {
-            int lineHeight = textView.getLineHeight();
-            int width = lineHeight * tagDrawable.getIntrinsicWidth() / tagDrawable.getIntrinsicHeight();
-            int height = lineHeight;
-            tagDrawable.setBounds(0, 0, width, height);
-        } else {
-            tagDrawable.setBounds(0, 0, tagDrawable.getIntrinsicWidth(), tagDrawable.getIntrinsicHeight());
-        }
-        return DrawableCompat.unwrap(tagDrawable);
+        return DrawableUtils.getTintDrawable(context, drawableResId, ColorUtils.getColor(context, id)
+                , textView != null ? textView.getLineHeight() : 0);
     }
 
     public static SpannableStringBuilder getTagSpannableStringBuilder(final Context context, final TextView textView, int id) {

@@ -52,13 +52,13 @@
             android:tint="@color/colorButton" />
 
         <ImageButton
-            android:id="@+id/memo_save"
+            android:id="@+id/bottom_save"
             style="?android:attr/actionButtonStyle"
             android:layout_width="36dp"
             android:layout_height="wrap_content"
-            android:onClick="onClickSaveButton"
             android:src="@drawable/ic_thumb_up_black_24dp"
-            android:tint="@color/colorButton" />
+            android:onClick="onClickSaveButton"
+            />
     </LinearLayout>
 
 </LinearLayout>

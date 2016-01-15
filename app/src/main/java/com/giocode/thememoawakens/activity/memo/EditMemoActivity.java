@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -16,12 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TimePicker;
 
 import com.giocode.thememoawakens.R;
 import com.giocode.thememoawakens.activity.TagPopupMenuHelper;
 import com.giocode.thememoawakens.activity.reserved.ReservedActivity;
 import com.giocode.thememoawakens.bo.MemoBo;
+import com.giocode.thememoawakens.util.DrawableUtils;
 import com.giocode.thememoawakens.util.TextConverter;
 
 import java.util.Calendar;
@@ -29,7 +33,8 @@ import java.util.Date;
 
 import io.realm.Realm;
 
-public class EditMemoActivity extends AppCompatActivity {
+
+public class EditMemoActivity extends AppCompatActivity implements TextWatcher {
 
     private static final String EXTRA_MEMO_ID = "memoId";
     private static final String EXTRA_HTMLTEXT = "htmlText";
@@ -41,7 +46,8 @@ public class EditMemoActivity extends AppCompatActivity {
     private Realm realm;
     private TagPopupMenuHelper tagPopupMenuHelper;
     private Calendar memoDateTime;
-
+    private ImageButton saveButton;
+    private int currentSaveButtonTineColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +56,9 @@ public class EditMemoActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        saveButton = (ImageButton) findViewById(R.id.bottom_save);
         editText = (EditText) findViewById(R.id.memo_edit);
+        editText.addTextChangedListener(this);
         String htmlText = getIntent().getStringExtra(EXTRA_HTMLTEXT);
         editText.setText(TextConverter.toCharSequence(htmlText, editText));
         editText.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +80,7 @@ public class EditMemoActivity extends AppCompatActivity {
         realm = Realm.getDefaultInstance();
         memoBo = new MemoBo(realm);
         tagPopupMenuHelper = new TagPopupMenuHelper(this, realm, editText);
+        updateSaveButton(false);
     }
 
     private void updateTitle() {
@@ -149,6 +158,7 @@ public class EditMemoActivity extends AppCompatActivity {
         memoDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
         memoDateTime.set(Calendar.MINUTE, minute);
         updateTitle();
+        updateSaveButton(true);
     }
 
     public void onDateSet(int year, int month, int day) {
@@ -156,6 +166,7 @@ public class EditMemoActivity extends AppCompatActivity {
         memoDateTime.set(Calendar.MONTH, month);
         memoDateTime.set(Calendar.DAY_OF_MONTH, day);
         updateTitle();
+        updateSaveButton(true);
     }
 
     public static Intent createIntent(Context context, long memoId, String htmlText, long time) {
@@ -164,6 +175,30 @@ public class EditMemoActivity extends AppCompatActivity {
                 .putExtra(EXTRA_MEMO_ID, memoId)
                 .putExtra(EXTRA_HTMLTEXT, htmlText)
                 .putExtra(EXTRA_TIME, time);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        updateSaveButton(true);
+    }
+
+    private void updateSaveButton(boolean isEdited) {
+        int color = isEdited ? getResources().getColor(R.color.colorPrimary) : getResources().getColor(R.color.colorButton);
+        if (currentSaveButtonTineColor == color) {
+            return;
+        }
+        currentSaveButtonTineColor = color;
+        saveButton.setImageDrawable(DrawableUtils.getTintDrawable(this, R.drawable.ic_thumb_up_black_24dp, color, 0));
     }
 
     public static class TimePickerFragment extends DialogFragment

@@ -8,8 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -26,6 +28,7 @@ import com.giocode.thememoawakens.bo.ReservedBo;
 import com.giocode.thememoawakens.eventbus.EventBus;
 import com.giocode.thememoawakens.model.Reserved;
 import com.giocode.thememoawakens.util.ColorUtils;
+import com.giocode.thememoawakens.util.DrawableUtils;
 import com.giocode.thememoawakens.util.TextConverter;
 import com.squareup.otto.Subscribe;
 
@@ -35,7 +38,7 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
-public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, TextWatcher {
 
 
     private static final String EXTRA_TAG_ORDER = "tagOrder";
@@ -61,6 +64,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
     private ArrayList<String> parentHtmlTexts;
     private int tagOrder;
     private int rootColorTagId;
+    private ImageButton saveButton;
 
     private static int[] ICON_RES_IDS = {
             R.drawable.ic_looks_one_white_24dp,
@@ -70,6 +74,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
             R.drawable.ic_looks_5_white_24dp,
             R.drawable.ic_looks_6_white_24dp,
     };
+    private int currentSaveButtonTineColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +85,10 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        saveButton = (ImageButton) findViewById(R.id.bottom_save);
         listView = (RecyclerView) findViewById(R.id.reserved_list);
         editText = (EditText) findViewById(R.id.bottom_input_edit);
+        editText.addTextChangedListener(this);
         adapter = new ReservedAdapter();
         listView.setAdapter(adapter);
         tagButton = (ImageButton) findViewById(R.id.bottom_tag);
@@ -93,6 +100,7 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         adapter.setEnableChild(tagOrder < ICON_RES_IDS.length - 1);
         updateUI();
         updateReservedResults(reservedBo.load(parentId));
+        updateSaveButton();
     }
 
     private void updateUI() {
@@ -306,5 +314,29 @@ public class ReservedActivity extends AppCompatActivity implements PopupMenu.OnM
         Intent intent = new Intent(context, ReservedActivity.class);
         intent.putExtra(EXTRA_PARENT_ID, parentId);
         return intent;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        updateSaveButton();
+    }
+
+    private void updateSaveButton() {
+        int color = editText.getText().length() > 0 ? getResources().getColor(R.color.colorPrimary) : getResources().getColor(R.color.colorButton);
+        if (currentSaveButtonTineColor == color) {
+            return;
+        }
+        currentSaveButtonTineColor = color;
+        saveButton.setImageDrawable(DrawableUtils.getTintDrawable(this, R.drawable.ic_thumb_up_black_24dp, color, 0));
     }
 }
