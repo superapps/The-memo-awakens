@@ -8,5 +8,6 @@
     <string name="action_search">검색</string>
     <string name="action_change_time">시간변경</string>
     <string name="action_change_date">날짜변경</string>
+    <string name="message_delete_all">전체 메모를 삭제하시겠습니까?</string>
 
 </resources>

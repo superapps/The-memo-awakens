@@ -1,12 +1,12 @@
 package com.giocode.thememoawakens.activity.memo;
 
-import android.content.res.ColorStateList;
-import android.graphics.Color;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -144,7 +144,19 @@ public class MemoActivity extends AppCompatActivity implements TextWatcher {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_wipe_all_memos) {
-            memoBo.clearAll();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.message_delete_all)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            memoBo.clearAll();
+                        }
+                    }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            }).create().show();
             return true;
         }
 

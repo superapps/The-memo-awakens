@@ -15,4 +15,6 @@
     <string name="action_search">Search</string>
     <string name="action_change_time">Change time</string>
     <string name="action_change_date">Change date</string>
+
+    <string name="message_delete_all">All memos will be deleted. Continue?</string>
 </resources>
